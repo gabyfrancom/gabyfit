@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a12">
+<title>GabyFit</title>
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,0);user-select:none;-webkit-user-select:none}
+:root{
+  --bg:#0a0a12;--surface:#13131f;--surface2:#1c1c2e;--border:#252538;
+  --text:#f0ede8;--muted:#6b6b85;
+  --A:#E8734A;--B:#3EC9A7;--C:#6B8FD4;--D:#C45EC4;
+  --gold:#D4A853;--teal:#3EC9A7;--plyo:#C45EC4;
+  --red:#E84A4A;--green:#3EC9A7;--yellow:#D4A853;
+}
+html{height:100%;overflow:hidden}
+body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px}
+.page{position:fixed;inset:0;background:var(--bg);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;display:none;flex-direction:column}
+.page.active{display:flex}
+.bnav{position:fixed;bottom:0;left:0;right:0;height:64px;background:#13131f;border-top:1px solid #252538;display:flex;z-index:999}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:#6b6b85;font-size:10px;font-weight:700;cursor:pointer;padding:8px 2px;letter-spacing:0.3px;-webkit-appearance:none}
+.bnav-btn.on{color:#E8734A}
+.bnav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.phdr{padding:48px 18px 14px;flex-shrink:0}
+.phdr h1{font-size:26px;font-weight:800;letter-spacing:-0.5px}
+.phdr p{color:var(--muted);font-size:14px;margin-top:2px}
+.banner{margin:0 16px 14px;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid var(--border);border-radius:20px;padding:20px;position:relative;overflow:hidden}
+.banner::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(232,115,74,0.18),transparent 60%);pointer-events:none}
+.banner .btag{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--A);font-weight:700;margin-bottom:8px}
+.banner h2{font-size:20px;font-weight:800;margin-bottom:4px;line-height:1.2}
+.banner p{color:var(--muted);font-size:13px;line-height:1.4;margin-bottom:14px}
+.btn-orange{display:inline-block;background:var(--A);color:#fff;border:none;padding:11px 24px;border-radius:100px;font-weight:800;font-size:14px;cursor:pointer;letter-spacing:0.3px;-webkit-appearance:none}
+.slabel{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);font-weight:700;padding:2px 18px 10px}
+.wrow{display:flex;gap:8px;padding:0 16px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.wrow::-webkit-scrollbar{display:none}
+.wday{flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:12px 8px;text-align:center;min-width:68px}
+.wday.today{border-color:var(--A);background:rgba(232,115,74,0.08)}
+.wday .wdn{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-weight:700;margin-bottom:6px}
+.wday .wdc{font-size:11px;font-weight:700;line-height:1.4}
+.dcard{background:var(--surface);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;overflow:hidden;cursor:pointer}
+.dcard:active{opacity:0.7}
+.dcard-top{padding:16px;display:flex;align-items:center;gap:12px}
+.demoji{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.dcard-info{flex:1}
+.dcard-info h3{font-size:16px;font-weight:800;margin-bottom:2px}
+.dcard-info p{font-size:12px;color:var(--muted)}
+.dcard-info .dex{font-size:11px;font-weight:700;margin-top:4px}
+.dcard-bot{padding:8px 16px 14px;border-top:1px solid var(--border);display:flex;gap:8px}
+.tpill{font-size:10px;padding:3px 10px;border-radius:100px;font-weight:700}
+.backbtn{display:flex;align-items:center;gap:6px;color:var(--A);font-weight:700;font-size:15px;cursor:pointer;padding:48px 16px 12px;flex-shrink:0;background:none;border:none;-webkit-appearance:none;width:100%}
+.backbtn:active{opacity:0.7}
+.backbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.dhero{background:var(--surface);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;padding:18px}
+.dhero .dlabel{font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.dhero h2{font-size:22px;font-weight:800;margin-bottom:6px}
+.dhero p{font-size:13px;color:var(--muted);line-height:1.5}
+.tip-box{background:rgba(232,115,74,0.07);border:1px solid rgba(232,115,74,0.2);border-radius:13px;padding:12px 14px;margin:0 16px 10px;font-size:13px;color:var(--muted);line-height:1.5}
+.tip-box b{color:var(--A)}
+.plyo-box{background:rgba(196,94,196,0.07);border:1px solid rgba(196,94,196,0.2);border-radius:13px;padding:10px 14px;margin:0 16px 14px;font-size:12px;color:var(--muted)}
+.plyo-box b{color:var(--plyo)}
+.exitem{background:var(--surface);border:1px solid var(--border);border-radius:15px;margin:0 16px 9px;padding:13px 14px;display:flex;align-items:center;gap:11px;cursor:pointer}
+.exitem:active{opacity:0.65}
+.exitem.eplyo{border-color:rgba(196,94,196,0.35);background:rgba(196,94,196,0.04)}
+.exitem.eprehab{border-color:rgba(212,168,83,0.35);background:rgba(212,168,83,0.04)}
+.exitem.ecore{border-color:rgba(62,201,167,0.25)}
+.exnum{width:32px;height:32px;border-radius:9px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0}
+.eplyo .exnum{background:rgba(196,94,196,0.15);color:var(--plyo)}
+.eprehab .exnum{background:rgba(212,168,83,0.15);color:var(--gold)}
+.ecore .exnum{background:rgba(62,201,167,0.12);color:var(--teal)}
+.exinfo{flex:1}
+.exbadge{font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:3px}
+.exinfo h4{font-size:15px;font-weight:700;line-height:1.3}
+.exsummary{font-size:12px;color:var(--muted);margin-top:2px}
+.excheck{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+.excheck.done{background:var(--teal);border-color:var(--teal)}
+.excheck svg{display:none;width:13px;height:13px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round}
+.excheck.done svg{display:block}
+.exhero{background:var(--surface);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;padding:20px}
+.exhero-badge{font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.exhero-name{font-size:22px;font-weight:800;margin-bottom:4px;line-height:1.2}
+.exhero-muscle{font-size:13px;color:var(--muted);margin-bottom:16px}
+.exstats{display:flex;gap:12px;background:var(--surface2);border-radius:12px;padding:12px}
+.exstat{flex:1;text-align:center}
+.sv{font-size:20px;font-weight:800;margin-bottom:2px}
+.sl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.exnote{background:rgba(232,115,74,0.07);border:1px solid rgba(232,115,74,0.15);border-radius:13px;padding:14px 16px;margin:0 16px 12px;font-size:13px;color:var(--muted);line-height:1.6}
+.exnote b{color:var(--A)}
+.sets-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;padding:4px 18px 10px}
+.setrow{background:var(--surface);border:1px solid var(--border);border-radius:13px;margin:0 16px 8px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.15s}
+.setrow:active{opacity:0.6}
+.setrow.sdone{background:rgba(62,201,167,0.08);border-color:rgba(62,201,167,0.35)}
+.setnum{width:36px;height:36px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--muted);flex-shrink:0}
+.setrow.sdone .setnum{background:rgba(62,201,167,0.2);color:var(--teal)}
+.setinfo{flex:1;font-size:14px;font-weight:700}
+.setreps{font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+.settick{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.setrow.sdone .settick{background:var(--teal);border-color:var(--teal)}
+.settick svg{display:none;width:14px;height:14px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round}
+.setrow.sdone .settick svg{display:block}
+.finish-bar{padding:12px 16px 8px;flex-shrink:0}
+.finish-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--A),#c45e3a);color:#fff;border:none;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:0.3px;-webkit-appearance:none}
+.finish-btn:active{opacity:0.8}
+.done-overlay{position:fixed;inset:0;background:rgba(10,10,18,0.95);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center}
+.done-overlay.on{display:flex}
+.done-emoji{font-size:64px;margin-bottom:20px}
+.done-title{font-size:28px;font-weight:800;margin-bottom:8px}
+.done-msg{font-size:16px;color:var(--muted);line-height:1.6;margin-bottom:32px}
+.done-spa-btn{background:var(--teal);color:#000;border:none;padding:15px 36px;border-radius:100px;font-size:16px;font-weight:800;cursor:pointer;-webkit-appearance:none}
+.done-spa-btn:active{opacity:0.8}
+.timer{position:fixed;inset:0;background:rgba(10,10,18,0.97);z-index:8888;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.timer.on{display:flex}
+.timer svg.tc{width:180px;height:180px}
+.t-circle-bg{fill:none;stroke:#1c1c2e;stroke-width:8}
+.t-circle-prog{fill:none;stroke:var(--A);stroke-width:8;stroke-linecap:round;stroke-dasharray:534;stroke-dashoffset:0;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 0.9s linear}
+.tnum{font-size:54px;font-weight:800;color:var(--text)}
+.tnext{font-size:14px;color:var(--muted);text-align:center;line-height:1.5;padding:0 32px}
+.timer-btns{display:flex;gap:12px}
+.t-btn{padding:12px 28px;border-radius:100px;font-size:14px;font-weight:700;cursor:pointer;border:none;-webkit-appearance:none}
+.t-skip{background:var(--surface2);color:var(--muted)}
+.t-ok{background:var(--A);color:#fff}
+.t-btn:active{opacity:0.7}
+.sphase{background:var(--surface);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;overflow:hidden}
+.sphase.star-ph{border-color:rgba(212,168,83,0.4)}
+.sphdr{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.spnum{width:30px;height:30px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--muted);flex-shrink:0}
+.star-ph .spnum{background:rgba(212,168,83,0.15);color:var(--gold)}
+.spinfo{flex:1}
+.spinfo h3{font-size:15px;font-weight:800}
+.sptime{font-size:11px;color:var(--muted);font-weight:600;background:var(--surface2);padding:4px 10px;border-radius:100px}
+.spsteps{padding:4px 0 8px}
+.spstep{display:flex;gap:10px;padding:10px 16px;align-items:flex-start}
+.spicon{font-size:22px;flex-shrink:0;margin-top:1px}
+.spname{font-size:13px;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.spdesc{font-size:12px;color:var(--muted);line-height:1.5}
+.temp{font-size:10px;padding:2px 7px;border-radius:100px;font-weight:700}
+.temp.hot{background:rgba(232,115,74,0.15);color:var(--A)}
+.temp.cold{background:rgba(107,143,212,0.15);color:var(--C)}
+.temp.star-t{background:rgba(212,168,83,0.15);color:var(--gold)}
+/* === FORM === */
+.form-section{background:var(--surface);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;padding:16px}
+.form-section h3{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.form-label span{font-size:10px;color:#3b3b52;letter-spacing:0;text-transform:none;font-weight:400;margin-left:4px}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:11px 12px;color:var(--text);font-size:15px;-webkit-appearance:none;font-family:inherit}
+.form-input:focus{outline:none;border-color:var(--A)}
+.form-input::placeholder{color:#3b3b52}
+.save-btn{width:100%;margin-top:12px;padding:14px;background:var(--A);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;-webkit-appearance:none;letter-spacing:0.3px}
+.save-btn:active{opacity:0.8}
+/* === RESULTS === */
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;padding:16px}
+.result-card h3{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.result-row:last-child{border-bottom:none}
+.r-label{font-size:13px;color:var(--muted)}
+.r-val{display:flex;align-items:center;gap:7px}
+.r-num{font-size:16px;font-weight:800}
+.r-badge{font-size:9px;padding:3px 8px;border-radius:100px;font-weight:700;letter-spacing:0.5px}
+.rb-ok{background:rgba(62,201,167,0.18);color:#3EC9A7}
+.rb-warn{background:rgba(212,168,83,0.18);color:#D4A853}
+.rb-bad{background:rgba(232,74,74,0.18);color:#E84A4A}
+.rb-na{background:var(--surface2);color:var(--muted)}
+/* === HISTORY TABLE === */
+.hist-wrap{background:var(--surface);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;padding:16px;overflow-x:auto}
+.hist-wrap h3{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.hist-table{width:100%;border-collapse:collapse;min-width:400px}
+.hist-table th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:4px 6px;text-align:left;white-space:nowrap}
+.hist-table td{font-size:12px;padding:8px 6px;border-top:1px solid var(--border);color:var(--text);white-space:nowrap}
+.hist-table .trend-up{color:#3EC9A7}
+.hist-table .trend-dn{color:#E84A4A}
+.hist-table .trend-eq{color:var(--muted)}
+/* === MORE MENU === */
+.more-grid{padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.more-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px 16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.more-card:active{opacity:0.7}
+.more-card .mc-icon{font-size:36px}
+.more-card h3{font-size:15px;font-weight:800}
+.more-card p{font-size:11px;color:var(--muted);line-height:1.4}
+/* === HEALTH SUBTABS === */
+.sub-tabs{display:flex;margin:0 16px 16px;background:var(--surface2);border-radius:14px;padding:4px;gap:3px}
+.sub-tab{flex:1;text-align:center;padding:9px 4px;border-radius:11px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;-webkit-appearance:none;border:none;background:none}
+.sub-tab.on{background:var(--surface);color:var(--text)}
+.sub-tab:active{opacity:0.7}
+.sub-content{display:none}
+.sub-content.on{display:block}
+/* === BLOOD TEST === */
+.blood-cat{background:var(--surface);border:1px solid var(--border);border-radius:18px;margin:0 16px 12px;overflow:hidden}
+.blood-cat-hdr{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:10px}
+.blood-cat-hdr:active{opacity:0.7}
+.bch-left{display:flex;align-items:center;gap:10px}
+.bch-icon{font-size:20px}
+.bch-title{font-size:14px;font-weight:800}
+.bch-arr{font-size:18px;color:var(--muted);transition:transform 0.2s}
+.blood-cat.open .bch-arr{transform:rotate(180deg)}
+.blood-cat-body{display:none;padding:0 16px 12px}
+.blood-cat.open .blood-cat-body{display:block}
+.bv-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border)}
+.bv-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--muted)}
+.bv-dot.ok{background:var(--green)}
+.bv-dot.warn{background:var(--yellow)}
+.bv-dot.bad{background:var(--red)}
+.bv-info{flex:1}
+.bv-name{font-size:13px;font-weight:700}
+.bv-ref{font-size:10px;color:var(--muted);margin-top:1px}
+.bv-inp{width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:8px 10px;color:var(--text);font-size:14px;font-weight:700;text-align:right;-webkit-appearance:none;font-family:inherit}
+.bv-inp:focus{outline:none;border-color:var(--A)}
+.bv-unit{font-size:10px;color:var(--muted);width:36px;text-align:left;flex-shrink:0;line-height:1.3}
+/* === ZONE BARS === */
+.zone-bars{margin:12px 0 4px}
+.zone-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.zone-bar{height:8px;border-radius:100px;flex:1}
+.zone-label{font-size:10px;color:var(--muted);width:28px;flex-shrink:0;text-align:right}
+.zone-range{font-size:11px;font-weight:700;width:80px;flex-shrink:0}
+/* === TOAST === */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1c1c2e;border:1px solid var(--border);border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700;color:var(--text);z-index:7777;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* === FC INPUT === */
+.fc-big{font-size:48px;font-weight:800;color:var(--A);text-align:center;background:none;border:none;width:100%;-webkit-appearance:none;font-family:inherit}
+.fc-big:focus{outline:none}
+.fc-unit{text-align:center;font-size:13px;color:var(--muted);margin-top:2px}
+.stat-pair{display:flex;gap:10px;margin-bottom:10px}
+.stat-box{flex:1;background:var(--surface2);border-radius:13px;padding:14px 12px;text-align:center}
+.stat-box .sv2{font-size:22px;font-weight:800;margin-bottom:2px}
+.stat-box .sl2{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="pg-home" class="page active">
+  <div class="phdr"><h1>GabyFit 💪</h1><p id="home-date">Cargando...</p></div>
+  <div class="banner">
+    <div class="btag">HOY ENTRENÁS</div>
+    <h2 id="sug-title">Día A · Potencia Base</h2>
+    <p id="sug-desc">13 ejercicios · ~70 min · Full Body</p>
+    <button class="btn-orange" id="sug-btn" onclick="gSugDay()">Empezar →</button>
+  </div>
+  <div class="slabel">SEMANA</div>
+  <div class="wrow" id="week-row"></div>
+</div>
+
+<!-- TRAIN LIST -->
+<div id="pg-train" class="page">
+  <div class="phdr"><h1>Entrenar 🏋️</h1><p>Elegí tu día</p></div>
+  <div id="day-cards-container"></div>
+</div>
+
+<!-- EXLIST -->
+<div id="pg-exlist" class="page">
+  <button class="backbtn" onclick="gShow('train')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Volver a días</button>
+  <div id="exlist-hero"></div>
+  <div class="slabel">EJERCICIOS</div>
+  <div id="exlist-items"></div>
+  <div class="finish-bar"><button class="finish-btn" onclick="gFinish()">✅ Completé el entrenamiento</button></div>
+</div>
+
+<!-- EXDETAIL -->
+<div id="pg-exdetail" class="page">
+  <button class="backbtn" onclick="gBackToExList()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg><span id="back-day-label">Volver</span></button>
+  <div id="exdetail-content"></div>
+</div>
+
+<!-- SPA -->
+<div id="pg-spa" class="page">
+  <div class="phdr"><h1>Spa 🌊</h1><p>Protocolo de recuperación activa</p></div>
+  <div id="spa-container"></div>
+</div>
+
+<!-- MAS MENU -->
+<div id="pg-more" class="page">
+  <div class="phdr"><h1>Más ···</h1><p>Seguimiento personal</p></div>
+  <div class="more-grid">
+    <div class="more-card" onclick="gShow('metrics')">
+      <div class="mc-icon">📊</div>
+      <h3>Métricas</h3>
+      <p>Peso · Medidas · IMC · % Grasa</p>
+    </div>
+    <div class="more-card" onclick="gShow('health')">
+      <div class="mc-icon">❤️</div>
+      <h3>Salud</h3>
+      <p>FC · Tensión · Análisis de sangre</p>
+    </div>
+  </div>
+</div>
+
+<!-- METRICS -->
+<div id="pg-metrics" class="page">
+  <button class="backbtn" onclick="gShow('more')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Más</button>
+  <div class="phdr" style="padding-top:0"><h1>📊 Métricas</h1><p>Composición corporal</p></div>
+
+  <div class="form-section">
+    <h3>Nueva medición</h3>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label class="form-label">Fecha</label>
+        <input class="form-input" type="date" id="m-fecha">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Peso <span>kg</span></label>
+        <input class="form-input" type="number" step="0.1" placeholder="65.0" id="m-peso" oninput="gCalcMetrics()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Altura <span>cm</span></label>
+        <input class="form-input" type="number" placeholder="165" id="m-altura" oninput="gCalcMetrics()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cintura <span>cm</span></label>
+        <input class="form-input" type="number" placeholder="75" id="m-cintura" oninput="gCalcMetrics()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cadera <span>cm</span></label>
+        <input class="form-input" type="number" placeholder="95" id="m-cadera" oninput="gCalcMetrics()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pecho <span>cm</span></label>
+        <input class="form-input" type="number" placeholder="88" id="m-pecho" oninput="gCalcMetrics()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cuello <span>cm</span></label>
+        <input class="form-input" type="number" placeholder="35" id="m-cuello" oninput="gCalcMetrics()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Muslo <span>cm</span></label>
+        <input class="form-input" type="number" placeholder="55" id="m-muslo">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Brazo <span>cm</span></label>
+        <input class="form-input" type="number" placeholder="30" id="m-brazo">
+      </div>
+    </div>
+    <button class="save-btn" onclick="gSaveMetrics()">💾 Guardar medición</button>
+  </div>
+
+  <div class="result-card" id="metrics-results" style="display:none">
+    <h3>Resultados calculados</h3>
+    <div id="metrics-results-body"></div>
+  </div>
+
+  <div class="hist-wrap" id="metrics-hist-wrap" style="display:none">
+    <h3>📈 Historial</h3>
+    <div style="overflow-x:auto"><table class="hist-table" id="metrics-hist-table"></table></div>
+  </div>
+</div>
+
+<!-- HEALTH -->
+<div id="pg-health" class="page">
+  <button class="backbtn" onclick="gShow('more')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Más</button>
+  <div class="phdr" style="padding-top:0"><h1>❤️ Salud</h1><p>Monitoreo de salud cardiovascular y metabólica</p></div>
+
+  <div class="sub-tabs">
+    <button class="sub-tab on" id="stab-fc" onclick="gHealthTab('fc')">FC</button>
+    <button class="sub-tab" id="stab-ta" onclick="gHealthTab('ta')">Tensión</button>
+    <button class="sub-tab" id="stab-blood" onclick="gHealthTab('blood')">Sangre</button>
+  </div>
+
+  <!-- FC TAB -->
+  <div class="sub-content on" id="sc-fc">
+    <div class="result-card">
+      <h3>Frecuencia Cardíaca Máxima</h3>
+      <div class="result-row">
+        <span class="r-label">FC Máx teórica (220 - 53)</span>
+        <div class="r-val"><span class="r-num" style="color:var(--A)">167</span><span class="r-badge rb-na">bpm</span></div>
+      </div>
+      <h3 style="margin-top:14px">Zonas de Entrenamiento</h3>
+      <div class="zone-bars" id="zone-bars"></div>
+    </div>
+    <div class="form-section">
+      <h3>Registrar FC</h3>
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Fecha</label><input class="form-input" type="date" id="fc-fecha"></div>
+        <div class="form-group"><label class="form-label">FC Reposo <span>bpm</span></label><input class="form-input" type="number" placeholder="62" id="fc-reposo"></div>
+        <div class="form-group"><label class="form-label">FC Actividad <span>bpm</span></label><input class="form-input" type="number" placeholder="145" id="fc-actividad"></div>
+      </div>
+      <div class="form-group" style="margin-top:10px"><label class="form-label">Notas</label><input class="form-input" type="text" placeholder="ej: post-día A, sentí buena recuperación" id="fc-notas"></div>
+      <button class="save-btn" onclick="gSaveFC()">💾 Guardar FC</button>
+    </div>
+    <div class="hist-wrap" id="fc-hist-wrap" style="display:none">
+      <h3>📈 Historial FC</h3>
+      <table class="hist-table" id="fc-hist-table"></table>
+    </div>
+  </div>
+
+  <!-- TENSION TAB -->
+  <div class="sub-content" id="sc-ta">
+    <div class="result-card">
+      <h3>Clasificación Tensión Arterial</h3>
+      <div class="result-row"><span class="r-label">Normal</span><div class="r-val"><span class="r-num" style="font-size:13px;color:var(--green)">&lt; 120 / &lt; 80</span></div></div>
+      <div class="result-row"><span class="r-label">Elevada</span><div class="r-val"><span class="r-num" style="font-size:13px;color:var(--yellow)">120-129 / &lt; 80</span></div></div>
+      <div class="result-row"><span class="r-label">HTA Grado I</span><div class="r-val"><span class="r-num" style="font-size:13px;color:var(--yellow)">130-139 / 80-89</span></div></div>
+      <div class="result-row"><span class="r-label">HTA Grado II</span><div class="r-val"><span class="r-num" style="font-size:13px;color:var(--red)">≥ 140 / ≥ 90</span></div></div>
+    </div>
+    <div class="form-section">
+      <h3>Registrar tensión</h3>
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Fecha</label><input class="form-input" type="date" id="ta-fecha"></div>
+        <div class="form-group"><label class="form-label">Sistólica <span>mmHg</span></label><input class="form-input" type="number" placeholder="120" id="ta-sis"></div>
+        <div class="form-group"><label class="form-label">Diastólica <span>mmHg</span></label><input class="form-input" type="number" placeholder="80" id="ta-dia"></div>
+      </div>
+      <div id="ta-result" style="margin-top:10px;display:none">
+        <div class="result-row" style="border:none;padding:8px 0 0">
+          <span class="r-label">Clasificación</span>
+          <div class="r-val"><span class="r-badge" id="ta-badge">—</span></div>
+        </div>
+      </div>
+      <button class="save-btn" onclick="gSaveTA()">💾 Guardar tensión</button>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input style="flex:1" class="form-input" type="text" placeholder="Notas (opcional)" id="ta-notas">
+      </div>
+    </div>
+    <div class="hist-wrap" id="ta-hist-wrap" style="display:none">
+      <h3>📈 Historial Tensión</h3>
+      <table class="hist-table" id="ta-hist-table"></table>
+    </div>
+  </div>
+
+  <!-- BLOOD TAB -->
+  <div class="sub-content" id="sc-blood">
+    <div style="margin:0 16px 10px;background:rgba(212,168,83,0.08);border:1px solid rgba(212,168,83,0.25);border-radius:13px;padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.5">
+      ⚠️ <b style="color:var(--gold)">INR — Anticoagulación:</b> Rango normal (0.8–1.2) NO es tu rango terapéutico. Consultá con tu médico el rango objetivo de tu tratamiento.
+    </div>
+    <div style="margin:0 16px 10px">
+      <div class="form-group"><label class="form-label">Fecha del análisis</label><input class="form-input" type="date" id="bl-fecha"></div>
+    </div>
+    <div id="blood-form-container"></div>
+    <div style="margin:0 16px 16px"><button class="save-btn" onclick="gSaveBlood()">💾 Guardar análisis</button></div>
+    <div class="hist-wrap" id="blood-hist-wrap" style="display:none">
+      <h3>📈 Últimos análisis</h3>
+      <div id="blood-hist-body"></div>
+    </div>
+  </div>
+</div>
+
+
+<nav class="bnav">
+  <button class="bnav-btn on" id="nav-home" onclick="gShow('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio
+  </button>
+  <button class="bnav-btn" id="nav-train" onclick="gShow('train')">
+    <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Entrenar
+  </button>
+  <button class="bnav-btn" id="nav-spa" onclick="gShow('spa')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>Spa
+  </button>
+  <button class="bnav-btn" id="nav-more" onclick="gShow('more')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>Más
+  </button>
+</nav>
+
+
+<div class="done-overlay" id="done-overlay">
+  <div class="done-emoji">🏆</div>
+  <div class="done-title">¡Lo lograste!</div>
+  <div class="done-msg" id="done-msg">Entrenamiento completado</div>
+  <button class="done-spa-btn" onclick="gDoneSpa()">Ir al Spa 🌊</button>
+</div>
+<div class="timer" id="timer">
+  <svg class="tc" viewBox="0 0 180 180">
+    <circle class="t-circle-bg" cx="90" cy="90" r="85"/>
+    <circle class="t-circle-prog" id="tprog" cx="90" cy="90" r="85"/>
+    <text id="tnum" x="90" y="103" text-anchor="middle" font-size="54" font-weight="800" fill="#f0ede8" font-family="system-ui">0</text>
+  </svg>
+  <div class="tnext" id="tnext">Preparate...</div>
+  <div class="timer-btns">
+    <button class="t-btn t-skip" onclick="gStopTimer()">Saltar</button>
+    <button class="t-btn t-ok" onclick="gStopTimer()">Listo ✓</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+
+// ===================================================
+// DATA
+// ===================================================
+var DAYS = {
+  A:{id:'A',name:'Potencia Base',emoji:'\uD83D\uDD25',color:'#E8734A',
+    focus:'Sentadilla \u00b7 Pecho \u00b7 Espalda \u00b7 Gl\u00fateos',
+    desc:'El d\u00eda que construye la base. \u00c9nfasis en squat, empuje horizontal y posterior de piernas.',
+    tip:'Para definici\u00f3n: descanss\u00e1 60-75 seg entre series de aislamientos para mantener el pulso elevado.',
+    plyo:'Pliom\u00e9trico: Step-up explosivo al caj\u00f3n \u2014 bajo impacto, alto reclutamiento. Perfecto para la rodilla.',
+    exs:[
+      {id:'a1',n:1,name:'Sentadilla con Barra',badge:'Compuesto',type:'c',s:4,r:'10-12',rest:90,muscle:'Cu\u00e1driceps \u00b7 Gl\u00fateos \u00b7 Core',note:'Barra en trapecios, pies al ancho de caderas. Profundidad seg\u00fan rodilla, espalda neutra. Empuja desde los talones. Las primeras semanas: rango c\u00f3modo antes de agregar peso.'},
+      {id:'a2',n:2,name:'Press de Banca con Barra',badge:'Compuesto',type:'c',s:4,r:'10-12',rest:90,muscle:'Pecho \u00b7 Tr\u00edceps \u00b7 Hombro anterior',note:'Codos a 45-60\u00b0, no completamente abiertos. Protege el hombro. Esc\u00e1pulas reta\u00eddas toda la serie. Baj\u00e1 lento 3 seg, sub\u00ed explosivo.'},
+      {id:'a3',n:3,name:'Remo con Barra Inclinado',badge:'Compuesto',type:'c',s:4,r:'10-12',rest:90,muscle:'Dorsal \u00b7 Romboides \u00b7 B\u00edceps',note:'Torso a ~45\u00b0, codos pegados al cuerpo. Tir\u00e1 hacia el ombligo, no el pecho. Control\u00e1 la bajada 3 seg.'},
+      {id:'a4',n:4,name:'Prensa de Piernas',badge:'Compuesto',type:'c',s:3,r:'12-15',rest:75,muscle:'Cu\u00e1driceps \u00b7 Gl\u00fateos \u00b7 Isquios',note:'Pies al ancho de hombros. No bloquees rodillas arriba. A\u00f1ade volumen de cu\u00e1driceps sin carga espinal.'},
+      {id:'a5',n:5,name:'Hip Thrust con Barra',badge:'Compuesto',type:'c',s:4,r:'12-15',rest:75,muscle:'Gl\u00fateos \u00b7 Isquios \u00b7 Core',note:'Espalda alta en banco. Empuja desde el tal\u00f3n. Apret\u00e1 gl\u00fateo 1 seg arriba. El ejercicio del Camino y de la definici\u00f3n gl\u00fateo. Insustituible.'},
+      {id:'a6',n:6,name:'Jal\u00f3n al Pecho en Polea',badge:'Aislamiento',type:'i',s:3,r:'12',rest:60,muscle:'Dorsal \u00b7 B\u00edceps \u00b7 Trapecio inferior',note:'Agarre ancho o neutro. Codos hacia las costillas al bajar. Esc\u00e1pulas hacia atr\u00e1s y abajo.'},
+      {id:'a7',n:7,name:'Extensi\u00f3n de Cu\u00e1driceps',badge:'Aislamiento',type:'i',s:3,r:'15',rest:60,muscle:'Cu\u00e1driceps',note:'Rango parcial si hay molestia en rodilla (0-90\u00b0). Contracci\u00f3n 1 seg arriba. Bajada controlada 3 seg.'},
+      {id:'a8',n:8,name:'Curl Femoral Tumbada',badge:'Aislamiento',type:'i',s:3,r:'15',rest:60,muscle:'Isquiotibiales \u00b7 Gl\u00fateos',note:'Esencial para proteger rodilla. Isquiotibiales fuertes = estabilizadores del c\u00f3ndilo femoral.'},
+      {id:'a9',n:9,name:'Elevaci\u00f3n de Gemelos en Prensa',badge:'Aislamiento',type:'i',s:3,r:'20',rest:45,muscle:'Gastrocnemio \u00b7 S\u00f3leo',note:'Rango completo: tal\u00f3n abajo, punta arriba. Pausa 1 seg arriba. El Camino de Santiago es, ante todo, una batalla de pantorrillas.'},
+      {id:'a10',n:10,name:'Face Pulls con Polea',badge:'Prehab \u2b50',type:'p',s:3,r:'20',rest:45,muscle:'Deltoides posterior \u00b7 Manguito rotador',note:'NUNCA omitir. Polea a altura de cabeza, cuerda, tir\u00e1 hacia la cara separando manos al final.'},
+      {id:'a11',n:11,name:'Step-up Explosivo al Caj\u00f3n',badge:'Pliom\u00e9trico',type:'pl',s:3,r:'10 c/lado',rest:75,muscle:'Gl\u00fateos \u00b7 Cu\u00e1driceps \u00b7 Gemelos',note:'Sub\u00ed explosiva, baj\u00e1 controlada. Caj\u00f3n a altura de rodilla. Empuja desde el tal\u00f3n del pie delantero.'},
+      {id:'a12',n:12,name:'Aperturas en Cables Cruzados',badge:'Aislamiento',type:'i',s:3,r:'15',rest:45,muscle:'Pecho \u00b7 Deltoides anterior',note:'Poleas a altura de pecho. Brazos ligeramente flexionados. Contracci\u00f3n pectoral al centro.'},
+      {id:'a13',n:13,name:'Plancha con Alcance de Mano',badge:'Core',type:'co',s:3,r:'45 seg',rest:45,muscle:'Core \u00b7 Transverso \u00b7 Estabilizadores',note:'En plancha, altern\u00e1s tocando cada hombro con la mano contraria. Anti-rotaci\u00f3n activa.'}
+    ]
+  },
+  B:{id:'B',name:'Bisagra & Jal\u00f3n',emoji:'\u26A1',color:'#3EC9A7',
+    focus:'Peso Muerto \u00b7 Espalda \u00b7 B\u00edceps \u00b7 Tr\u00edceps',
+    desc:'La cadena posterior completa. Isquios, gl\u00fateos, espalda alta. El d\u00eda del peso muerto.',
+    tip:'Superset recomendado: ejercicios 8+9 (tr\u00edceps + b\u00edceps). 45 seg entre el superset.',
+    plyo:'Pliom\u00e9trico: Skipping o cuerda \u2014 30 seg de potencia cardiovascular.',
+    exs:[
+      {id:'b1',n:1,name:'Peso Muerto Rumano con Barra',badge:'Compuesto',type:'c',s:4,r:'10',rest:90,muscle:'Isquios \u00b7 Gl\u00fateos \u00b7 Espalda baja',note:'Bisagra pura. Barra pegada al cuerpo, espalda neutra, hasta sentir tensi\u00f3n en isquios.'},
+      {id:'b2',n:2,name:'Dominadas Asistidas o Jal\u00f3n M\u00e1quina',badge:'Compuesto',type:'c',s:4,r:'10-12',rest:90,muscle:'Dorsal \u00b7 B\u00edceps \u00b7 Trapecio',note:'Si las dominadas son c\u00f3modas, \u00fasalas. Jalones verticales = m\u00e1ximo trabajo del dorsal.'},
+      {id:'b3',n:3,name:'Press Inclinado con Mancuernas',badge:'Compuesto',type:'c',s:3,r:'12',rest:75,muscle:'Pecho superior \u00b7 Tr\u00edceps \u00b7 Hombro',note:'Banco a 30-45\u00b0. No superes 90\u00b0 en el codo. Mancuernas = m\u00e1s seguras para el hombro.'},
+      {id:'b4',n:4,name:'Split Squat B\u00falgaro',badge:'Compuesto',type:'c',s:3,r:'10 c/lado',rest:90,muscle:'Cu\u00e1driceps \u00b7 Gl\u00fateos \u00b7 Isquios',note:'Pie trasero en banco. Rodilla delantera sobre tobillo. Con mancuernas.'},
+      {id:'b5',n:5,name:'Remo en Polea Baja Sentada',badge:'Compuesto',type:'c',s:3,r:'12',rest:60,muscle:'Dorsal \u00b7 Romboides \u00b7 B\u00edceps',note:'Agarre neutro, tir\u00e1 hacia el ombligo. Pecho fuera, columna recta.'},
+      {id:'b6',n:6,name:'Curl Femoral Tumbada',badge:'Aislamiento',type:'i',s:3,r:'15',rest:60,muscle:'Isquiotibiales \u00b7 Gl\u00fateos',note:'Segunda dosis semanal intencional. Isquiotibiales fuertes = rodilla protegida.'},
+      {id:'b7',n:7,name:'Abductor en M\u00e1quina',badge:'Aislamiento',type:'i',s:3,r:'20',rest:45,muscle:'Gl\u00fateo medio \u00b7 TFL',note:'Control en todo el rango. No rebotes. Fundamental para estabilidad p\u00e9lvica.'},
+      {id:'b8',n:8,name:'Extensi\u00f3n de Tr\u00edceps en Polea',badge:'Aislamiento',type:'i',s:3,r:'15',rest:45,muscle:'Tr\u00edceps (3 cabezas)',note:'Cuerda hacia abajo separando al final. Codos fijos. Sin overhead = ideal para el hombro.'},
+      {id:'b9',n:9,name:'Curl de B\u00edceps con Barra',badge:'Aislamiento',type:'i',s:3,r:'12',rest:45,muscle:'B\u00edceps \u00b7 Braquial',note:'Sin balanceo. Codos pegados. Supina al subir. Combinalo con ejercicio 8 en superset.'},
+      {id:'b10',n:10,name:'Rotaci\u00f3n Externa con Banda',badge:'Prehab \u2b50',type:'p',s:3,r:'20 c/lado',rest:45,muscle:'Manguito rotador \u00b7 Infraespinoso',note:'NUNCA omitir. Codo a 90\u00b0 pegado al cuerpo, banda en mano, rot\u00e1 hacia afuera.'},
+      {id:'b11',n:11,name:'Skipping o Saltos en Cuerda',badge:'Pliom\u00e9trico',type:'pl',s:3,r:'30 seg',rest:45,muscle:'Gemelos \u00b7 Cardio \u00b7 Coordinaci\u00f3n',note:'Aterrizaje suave sobre punta del pie. Rodillas semiflexionadas.'},
+      {id:'b12',n:12,name:'Dead Bug',badge:'Core',type:'co',s:3,r:'10 c/lado',rest:45,muscle:'Core profundo \u00b7 Transverso \u00b7 Mult\u00edfidos',note:'Zona lumbar pegada al suelo todo el tiempo. Extend\u00e9 brazo y pierna opuesta lentamente.'},
+      {id:'b13',n:13,name:'Adductor en M\u00e1quina',badge:'Aislamiento',type:'i',s:3,r:'20',rest:45,muscle:'Aductores \u00b7 Gr\u00e1cil',note:'Cerr\u00e1 lentamente. Complementa el abductor. Equilibrio muscular en cadera.'}
+    ]
+  },
+  C:{id:'C',name:'Unilateral & Cables',emoji:'\uD83C\uDFAF',color:'#6B8FD4',
+    focus:'Equilibrio \u00b7 TRX \u00b7 Core Funcional \u00b7 Cables',
+    desc:'El d\u00eda de la precisi\u00f3n. Un lado a la vez. Cables en tensi\u00f3n constante.',
+    tip:'Ideal acortar descansos y hacer mini-circuits. Par recomendado: ejercicios 9+10.',
+    plyo:'Pliom\u00e9trico: Salto lateral al step \u2014 reclutamiento de abductores y estabilizadores de cadera.',
+    exs:[
+      {id:'c1',n:1,name:'Sentadilla Goblet con Mancuerna',badge:'Compuesto',type:'c',s:3,r:'15',rest:75,muscle:'Cu\u00e1driceps \u00b7 Gl\u00fateos \u00b7 Core',note:'Mancuerna contra el pecho. Postura m\u00e1s erguida que squat con barra.'},
+      {id:'c2',n:2,name:'Peso Muerto a Una Pierna',badge:'Compuesto',type:'c',s:3,r:'10 c/lado',rest:90,muscle:'Gl\u00fateos \u00b7 Isquios \u00b7 Equilibrio',note:'Con mancuerna, pierna libre hacia atr\u00e1s. Foco en equilibrio. El ejercicio del Camino.'},
+      {id:'c3',n:3,name:'Remo con Mancuerna a Una Mano',badge:'Compuesto',type:'c',s:3,r:'12 c/lado',rest:75,muscle:'Dorsal \u00b7 Romboides \u00b7 B\u00edceps',note:'Rodilla y mano en banco. Tir\u00e1 el codo hacia el techo. Rango completo.'},
+      {id:'c4',n:4,name:'Press en M\u00e1quina Guiada Inclinada',badge:'Compuesto',type:'c',s:3,r:'12',rest:75,muscle:'Pecho superior \u00b7 Tr\u00edceps',note:'La m\u00e1quina guiada reduce inestabilidad del hombro. \u00c9nfasis en pecho superior.'},
+      {id:'c5',n:5,name:'Jal\u00f3n en Polea con Cuerda',badge:'Aislamiento',type:'i',s:3,r:'15',rest:60,muscle:'Dorsal inferior \u00b7 B\u00edceps',note:'Al pecho, cuerda, separando al llegar abajo. Tensi\u00f3n constante.'},
+      {id:'c6',n:6,name:'Extensi\u00f3n de Cadera en Polea Baja',badge:'Aislamiento',type:'i',s:3,r:'15 c/lado',rest:60,muscle:'Gl\u00fateo mayor \u00b7 Gl\u00fateo medio',note:'De pie, con tobillera. Llev\u00e1 la pierna hacia atr\u00e1s apretando gl\u00fateo.'},
+      {id:'c7',n:7,name:'Zancadas Caminando con Mancuernas',badge:'Compuesto',type:'c',s:3,r:'12 c/lado',rest:75,muscle:'Cu\u00e1driceps \u00b7 Gl\u00fateos \u00b7 Isquios',note:'Paso largo, rodilla delantera no supera el tobillo. Simula la mec\u00e1nica del Camino.'},
+      {id:'c8',n:8,name:'TRX Row \u2014 Remo en TRX',badge:'Funcional',type:'c',s:3,r:'12',rest:60,muscle:'Dorsal \u00b7 Trapecio \u00b7 B\u00edceps \u00b7 Core',note:'Cuanto m\u00e1s horizontal el cuerpo, m\u00e1s dif\u00edcil. Esc\u00e1pulas reta\u00eddas al llegar.'},
+      {id:'c9',n:9,name:'Curl de B\u00edceps en Cables',badge:'Aislamiento',type:'i',s:3,r:'15',rest:45,muscle:'B\u00edceps \u00b7 Braquioradial',note:'Tensi\u00f3n constante en todo el rango. Hac\u00e9 superset con ejercicio 10.'},
+      {id:'c10',n:10,name:'Press de Pecho en Cables Cruzados',badge:'Aislamiento',type:'i',s:3,r:'15',rest:45,muscle:'Pecho \u00b7 Deltoides anterior',note:'Poleas altas a medianas. Contracci\u00f3n m\u00e1xima al centro. Seguro para hombro.'},
+      {id:'c11',n:11,name:'Pallof Press \u2014 Core con Cable',badge:'Core',type:'co',s:3,r:'12 c/lado',rest:45,muscle:'Core anti-rotacional \u00b7 Oblicuos',note:'Polea lateral a altura de pecho. Empuj\u00e1 al frente y aguant\u00e1. Anti-rotaci\u00f3n pura.'},
+      {id:'c12',n:12,name:'Salto Lateral al Step',badge:'Pliom\u00e9trico',type:'pl',s:3,r:'10 c/lado',rest:75,muscle:'Abductores \u00b7 Gemelos \u00b7 Reactividad',note:'Salt\u00e1 lateralmente al step bajo. Aterriz\u00e1 suave, rodilla semiflexionada.'},
+      {id:'c13',n:13,name:'Plancha Lateral con Apertura',badge:'Core',type:'co',s:3,r:'10 c/lado',rest:45,muscle:'Oblicuos \u00b7 Cuadrado lumbar \u00b7 Cadera',note:'En plancha lateral, levant\u00e1 el brazo superior hacia el techo lentamente.'}
+    ]
+  },
+  D:{id:'D',name:'Funcional & Potencia',emoji:'\uD83D\uDCA5',color:'#C45EC4',
+    focus:"Kettlebell \u00b7 Farmer's Carry \u00b7 Circuito",
+    desc:"El m\u00e1s din\u00e1mico. Farmer's carry, movimientos encadenados, salto al caj\u00f3n. M\u00e1xima grasa visceral.",
+    tip:"Circuito final: ejercicios 7-8-9-11 encadenados con 20 seg de descanso. Tres rondas.",
+    plyo:'Pliom\u00e9trico: Salto al caj\u00f3n bajo con aterrizaje suave \u2014 potencia reactiva m\u00e1xima.',
+    exs:[
+      {id:'d1',n:1,name:'Kettlebell Swing o Peso Muerto Sumo',badge:'Compuesto',type:'c',s:4,r:'15',rest:75,muscle:'Gl\u00fateos \u00b7 Isquios \u00b7 Core \u00b7 Potencia',note:'Bisagra de cadera explosiva. Potencia desde gl\u00fateos, no espalda.'},
+      {id:'d2',n:2,name:"Farmer's Carry con Mancuernas",badge:'Funcional \u2b50',type:'c',s:3,r:'30-40 metros',rest:75,muscle:'Core \u00b7 Trapecios \u00b7 Antebrazos \u00b7 Piernas',note:"Mancuernas pesadas, camin\u00e1 recto. Este ejercicio replica exactamente el Camino con mochila. El m\u00e1s espec\u00edfico del programa."},
+      {id:'d3',n:3,name:'Step-ups Alternados con Mancuernas',badge:'Compuesto',type:'c',s:4,r:'12 c/lado',rest:75,muscle:'Gl\u00fateos \u00b7 Cu\u00e1driceps \u00b7 Gemelos',note:'Caj\u00f3n a altura de rodilla. Paso potente desde el tal\u00f3n. Altern\u00e1s piernas.'},
+      {id:'d4',n:4,name:'Press Inclinado en Cables Cruzados',badge:'Aislamiento',type:'i',s:3,r:'15',rest:60,muscle:'Pecho superior \u00b7 Tr\u00edceps',note:'Cables cruzados desde poleas bajas hacia arriba. Tensi\u00f3n constante.'},
+      {id:'d5',n:5,name:'Jal\u00f3n Frontal en Polea Alta',badge:'Aislamiento',type:'i',s:3,r:'12',rest:60,muscle:'Dorsal \u00b7 B\u00edceps \u00b7 Trapecio medio',note:'Agarre neutro o ancho. Tir\u00e1 codos hacia costillas.'},
+      {id:'d6',n:6,name:'Hip Thrust con Banda de Resistencia',badge:'Aislamiento',type:'i',s:3,r:'20',rest:45,muscle:'Gl\u00fateo mayor \u00b7 Gl\u00fateo medio',note:'Banda sobre las caderas. M\u00e1s activaci\u00f3n de gl\u00fateo medio. Contr\u00e1 2 seg arriba.'},
+      {id:'d7',n:7,name:'Mountain Climbers',badge:'Core',type:'co',s:3,r:'30 seg',rest:30,muscle:'Core \u00b7 Cardio \u00b7 Flexores de cadera',note:'Ritmo moderado-alto. Caderas paralelas al suelo, sin que suban.'},
+      {id:'d8',n:8,name:'Remo en M\u00e1quina',badge:'Compuesto',type:'c',s:3,r:'12',rest:60,muscle:'Dorsal \u00b7 Romboides \u00b7 B\u00edceps',note:'Pecho apoyado. Tir\u00e1 codos hacia atr\u00e1s. Isom\u00e9trico final 1 seg.'},
+      {id:'d9',n:9,name:'Curl de Pierna Unilateral',badge:'Aislamiento',type:'i',s:3,r:'12 c/lado',rest:60,muscle:'Isquios (unilateral)',note:'Un lado a la vez. Clave para la rodilla operada: equilibr\u00e1 fuerza entre ambas piernas.'},
+      {id:'d10',n:10,name:'Salto al Caj\u00f3n Bajo \u2014 Soft Landing',badge:'Pliom\u00e9trico',type:'pl',s:3,r:'10',rest:90,muscle:'Gl\u00fateos \u00b7 Cu\u00e1driceps \u00b7 Gemelos \u00b7 Reactivo',note:'Caj\u00f3n bajo (20-30cm). Salt\u00e1, aterriz\u00e1 suave con rodillas dobladas.'},
+      {id:'d11',n:11,name:'Plancha con Toque de Hombro',badge:'Core',type:'co',s:3,r:'10 c/lado',rest:45,muscle:'Core \u00b7 Anti-rotaci\u00f3n \u00b7 Estabilizadores',note:'En plancha, llev\u00e1 mano al hombro contrario controlando la rotaci\u00f3n.'},
+      {id:'d12',n:12,name:'Elevaci\u00f3n de Pantorrillas de Pie',badge:'Aislamiento',type:'i',s:3,r:'20',rest:45,muscle:'Gastrocnemio \u00b7 S\u00f3leo',note:'Con mancuernas o en m\u00e1quina. Rango completo. El Camino es una batalla de pantorrillas.'},
+      {id:'d13',n:13,name:'Rotaci\u00f3n Rusa con Peso',badge:'Core',type:'co',s:3,r:'15 c/lado',rest:45,muscle:'Oblicuos \u00b7 Transverso \u00b7 Core completo',note:'Talones ligeramente levantados, mancuerna liviana, rot\u00e1 el tronco completo.'}
+    ]
+  }
+};
+
+var SPA = [
+  {n:'1',title:'Activaci\u00f3n Vascular',time:'12-14 min',star:false,steps:[
+    {i:'\uD83D\uDEC3',name:'Ducha Caliente',temp:'hot',tl:'40-42\u00b0C \u00b7 3 min',desc:'Primera cosa al entrar. Limpia la piel, abre los poros y comienza la vasodilataci\u00f3n perif\u00e9rica.'},
+    {i:'\uD83C\uDF0A',name:'Piscina de Hidromasaje',temp:'hot',tl:'38-40\u00b0C \u00b7 10 min',desc:'El hidromasaje act\u00faa como masaje profundo. Apunt\u00e1 los chorros a zonas trabajadas.'}
+  ]},
+  {n:'2',title:'Contraste T\u00e9rmico',time:'5-6 min',star:false,steps:[
+    {i:'\uD83D\uDD04',name:'Ducha Escocesa',temp:'hot',tl:'caliente/fr\u00eda \u00b7 4-5 ciclos',desc:'30 seg caliente \u2192 15 seg fr\u00eda \u2192 repet\u00ed. La alternancia act\u00faa como bomba muscular.'}
+  ]},
+  {n:'3',title:'Calor Profundo',time:'18-20 min',star:false,steps:[
+    {i:'\uD83D\uDCA8',name:'Ba\u00f1o Turco',temp:'hot',tl:'40-45\u00b0C \u00b7 10-12 min',desc:'Calor h\u00famedo que penetra m\u00fasculo profundo. M\u00e1x 12 min. Hidr\u00e1tate bien antes.'},
+    {i:'\uD83C\uDFDB\uFE0F',name:'Terma Romana',temp:'hot',tl:'60-80\u00b0C \u00b7 seco \u00b7 6-8 min',desc:'Calor seco complementario. Activa prote\u00ednas de choque t\u00e9rmico que aceleran la regeneraci\u00f3n.'}
+  ]},
+  {n:'4',title:'\u2b50 Relajaci\u00f3n Total',time:'20-25 min',star:true,steps:[
+    {i:'\uD83C\uDF38',name:'Ducha de Aromaterapia',temp:'',tl:'3 min',desc:'Descenso de temperatura. Aromas de lavanda o eucalipto reducen el cortisol.'},
+    {i:'\u2728',name:'Flotarium con Cromoterapia',temp:'star',tl:'ESTRELLA \u00b7 18-20 min',desc:'Cero gravedad = columna y articulaciones descomprimidas. Luz azul-verde. Aqu\u00ed el sistema nervioso se regenera.'}
+  ]},
+  {n:'5',title:'Cierre & Pies',time:'8-10 min',star:false,steps:[
+    {i:'\uD83E\uDDB6',name:'Pediluvio',temp:'cold',tl:'terminar en fr\u00edo \u00b7 5 min',desc:'Para el Camino de Santiago, esto es sagrado. Comenz\u00e1 tibio y termin\u00e1 fr\u00edo.'},
+    {i:'\uD83D\uDCA7',name:'Piscina de Tonificaci\u00f3n',temp:'',tl:'3-5 min \u00b7 opcional',desc:'Si quer\u00e9s salir activada: termin\u00e1 aqu\u00ed. Si quer\u00e9s salir relajada: omitila.'}
+  ]}
+];
+
+var WEEK = [
+  {d:'LUN',t:'D\u00eda A',c:'color:#E8734A'},
+  {d:'MAR',t:'D\u00eda B',c:'color:#3EC9A7'},
+  {d:'MI\u00c9',t:'Pilates / Aquabike',c:'color:#D4A853'},
+  {d:'JUE',t:'D\u00eda C',c:'color:#6B8FD4'},
+  {d:'VIE',t:'D\u00eda D',c:'color:#C45EC4'},
+  {d:'S\u00c1B',t:'Carrera / Aquabike',c:'color:#4CAF50'},
+  {d:'DOM',t:'Descanso activo',c:'color:#6b6b85'}
+];
+
+var BLOOD_CATS = [
+  {id:'hemo',icon:'\uD83E\uDE78',title:'Hemograma Completo',fields:[
+    {id:'leucocitos',name:'Leucocitos',unit:'\u00d710\u00b3/\u03bcL',min:4.5,max:11.0},
+    {id:'eritrocitos',name:'Eritrocitos',unit:'\u00d710\u2076/\u03bcL',min:4.0,max:5.2},
+    {id:'hemoglobina',name:'Hemoglobina',unit:'g/dL',min:12.0,max:16.0},
+    {id:'hematocrito',name:'Hematocrito',unit:'%',min:36,max:46},
+    {id:'plaquetas',name:'Plaquetas',unit:'\u00d710\u00b3/\u03bcL',min:150,max:400},
+    {id:'neutrofilos',name:'Neutr\u00f3filos',unit:'%',min:50,max:70},
+    {id:'linfocitos',name:'Linfocitos',unit:'%',min:20,max:40},
+    {id:'monocitos',name:'Monocitos',unit:'%',min:2,max:8},
+    {id:'eosinofilos',name:'Eosin\u00f3filos',unit:'%',min:1,max:4}
+  ]},
+  {id:'gluco',icon:'\uD83C\uDF6F',title:'Glucosa & Metabolismo',fields:[
+    {id:'glucosa',name:'Glucosa (ayunas)',unit:'mg/dL',min:70,max:100},
+    {id:'hba1c',name:'HbA1c',unit:'%',min:0,max:5.7,decimals:1}
+  ]},
+  {id:'lipidos',icon:'\uD83D\uDCCA',title:'L\u00edpidos',fields:[
+    {id:'colesterol',name:'Colesterol total',unit:'mg/dL',min:0,max:200},
+    {id:'hdl',name:'HDL (bueno)',unit:'mg/dL',min:50,max:999,note:'Mujeres: >50'},
+    {id:'ldl',name:'LDL (malo)',unit:'mg/dL',min:0,max:130},
+    {id:'trigliceridos',name:'Triglic\u00e9ridos',unit:'mg/dL',min:0,max:150}
+  ]},
+  {id:'coagul',icon:'\uD83D\uDC89',title:'Coagulaci\u00f3n \u26a0\ufe0f',fields:[
+    {id:'inr',name:'INR',unit:'',min:0.8,max:1.2,note:'Rango normal. Tu rango terap\u00e9utico es diferente.',decimals:1,warn:true},
+    {id:'tp',name:'Tiempo de Protrombina',unit:'seg',min:11,max:14,decimals:1}
+  ]},
+  {id:'hierro',icon:'\uD83E\uDDE1',title:'Hierro & Ferritina',fields:[
+    {id:'ferritina',name:'Ferritina',unit:'ng/mL',min:12,max:150},
+    {id:'hierro',name:'Hierro s\u00e9rico',unit:'\u03bcg/dL',min:50,max:170},
+    {id:'transferrina',name:'Transferrina',unit:'mg/dL',min:200,max:360}
+  ]},
+  {id:'vitaminas',icon:'\u2600\ufe0f',title:'Vitaminas',fields:[
+    {id:'vitd',name:'Vitamina D (25-OH)',unit:'ng/mL',min:30,max:100,note:'Deficiencia <20, Insuficiencia 20-30'}
+  ]},
+  {id:'renal',icon:'\uD83D\uDCA7',title:'Funci\u00f3n Renal',fields:[
+    {id:'creatinina',name:'Creatinina',unit:'mg/dL',min:0.5,max:1.1,decimals:2},
+    {id:'urea',name:'Urea',unit:'mg/dL',min:15,max:45},
+    {id:'tfg',name:'TFG estimada',unit:'mL/min',min:60,max:999}
+  ]},
+  {id:'tiroides',icon:'\uD83E\uDE7A',title:'Tiroides',fields:[
+    {id:'tsh',name:'TSH',unit:'mIU/L',min:0.4,max:4.0,decimals:2}
+  ]}
+];
+
+// STATE
+var currentDay = null;
+var currentEx = null;
+var completedSets = {};
+var timerInterval = null;
+var timerTotal = 0;
+var timerLeft = 0;
+var curHealthTab = 'fc';
+
+// ===================================================
+// LOCALSTORAGE
+// ===================================================
+function lsGet(key) {
+  try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : []; } catch(e) { return []; }
+}
+function lsSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+// ===================================================
+// NAVIGATION
+// ===================================================
+function gShow(name) {
+  var pages = document.querySelectorAll('.page');
+  for(var i=0;i<pages.length;i++) pages[i].classList.remove('active');
+  var navBtns = document.querySelectorAll('.bnav-btn');
+  for(var j=0;j<navBtns.length;j++) navBtns[j].classList.remove('on');
+  var pg = document.getElementById('pg-'+name);
+  if(pg) pg.classList.add('active');
+  // highlight correct nav btn
+  var navMap = {home:'nav-home',train:'nav-train',exlist:'nav-train',exdetail:'nav-train',spa:'nav-spa',more:'nav-more',metrics:'nav-more',health:'nav-more'};
+  var nb = document.getElementById(navMap[name] || 'nav-'+name);
+  if(nb) nb.classList.add('on');
+  // refresh data views
+  if(name==='metrics') gRefreshMetricsHist();
+  if(name==='health') gRefreshHealth();
+}
+
+function gOpenDay(dayId) {
+  currentDay = dayId;
+  completedSets = {};
+  gBuildExList(dayId);
+  gShow('exlist');
+}
+function gTapDayCard(d) { gOpenDay(d); }
+function gSugDay() {
+  var btn = document.getElementById('sug-btn');
+  gOpenDay(btn ? (btn.getAttribute('data-day')||'A') : 'A');
+}
+function gBackToExList() { gBuildExList(currentDay); gShow('exlist'); }
+function gTapEx(id) { gOpenExercise(id); }
+function gTapSet(i) { gHandleSetTap(i); }
+
+function gFinish() {
+  var total=0; var k=Object.keys(completedSets);
+  for(var i=0;i<k.length;i++) total+=completedSets[k[i]];
+  var dm=document.getElementById('done-msg');
+  if(dm) dm.innerHTML='Completaste '+total+' series hoy!<br>Ahora protocolo de spa 🌊<br>Te lo ganaste, Gaby.';
+  var ov=document.getElementById('done-overlay'); if(ov) ov.classList.add('on');
+}
+function gDoneSpa() {
+  var ov=document.getElementById('done-overlay'); if(ov) ov.classList.remove('on');
+  gShow('spa');
+}
+function gStopTimer() {
+  clearInterval(timerInterval);
+  var t=document.getElementById('timer'); if(t) t.classList.remove('on');
+}
+
+// ===================================================
+// HOME
+// ===================================================
+function gInitHome() {
+  var days=['domingo','lunes','martes','mi\u00e9rcoles','jueves','viernes','s\u00e1bado'];
+  var months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var now=new Date();
+  var de=document.getElementById('home-date');
+  if(de) de.textContent=days[now.getDay()]+', '+now.getDate()+' de '+months[now.getMonth()];
+  var dow=now.getDay(); var map={1:'A',2:'B',4:'C',5:'D'}; var sd=map[dow]||'A'; var w=DAYS[sd];
+  var st=document.getElementById('sug-title'); if(st) st.textContent='D\u00eda '+sd+' \u00b7 '+w.name;
+  var sd2=document.getElementById('sug-desc'); if(sd2) sd2.textContent=w.exs.length+' ejercicios \u00b7 ~70 min \u00b7 Full Body';
+  var btn=document.getElementById('sug-btn'); if(btn) btn.setAttribute('data-day',sd);
+  var todayIdx=[1,2,3,4,5,6,0].indexOf(dow);
+  var html=''; for(var i=0;i<WEEK.length;i++) { var it=WEEK[i]; html+='<div class="wday'+(i===todayIdx?' today':'')+'"><div class="wdn">'+it.d+'</div><div class="wdc" style="'+it.c+'">'+it.t+'</div></div>'; }
+  var wr=document.getElementById('week-row'); if(wr) wr.innerHTML=html;
+}
+
+// ===================================================
+// TRAIN SCREEN
+// ===================================================
+function gInitTrainScreen() {
+  var html=''; var ids=['A','B','C','D'];
+  for(var k=0;k<ids.length;k++) {
+    var id=ids[k]; var w=DAYS[id];
+    html+='<div class="dcard" onclick="gTapDayCard(\''+id+'\')">'+
+      '<div class="dcard-top"><div class="demoji" style="background:'+w.color+'22">'+w.emoji+'</div>'+
+      '<div class="dcard-info"><h3>D\u00eda '+id+' \u00b7 <span style="color:'+w.color+'">'+w.name+'</span></h3>'+
+      '<p>'+w.focus+'</p><div class="dex" style="color:'+w.color+'">'+w.exs.length+' ejercicios \u00b7 Full Body</div></div>'+
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+w.color+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'+
+      '</div><div class="dcard-bot">'+
+      '<span class="tpill" style="background:'+w.color+'22;color:'+w.color+'">Compuestos</span>'+
+      '<span class="tpill" style="background:rgba(196,94,196,0.12);color:#C45EC4">Pliom\u00e9trico \uD83E\uDD98</span>'+
+      '<span class="tpill" style="background:rgba(212,168,83,0.12);color:#D4A853">Prehab \u2b50</span>'+
+      '</div></div>';
+  }
+  var dc=document.getElementById('day-cards-container'); if(dc) dc.innerHTML=html;
+}
+
+// ===================================================
+// EXLIST
+// ===================================================
+function gBuildExList(dayId) {
+  var w=DAYS[dayId];
+  var hero=document.getElementById('exlist-hero');
+  if(hero) hero.innerHTML=
+    '<div class="dhero" style="border-color:'+w.color+'33"><div class="dlabel" style="color:'+w.color+'">D\u00eda '+dayId+' \u00b7 Full Body</div>'+
+    '<h2>'+w.emoji+' '+w.name+'</h2><p>'+w.desc+'</p></div>'+
+    '<div class="tip-box"><b>\uD83D\uDCA1 Tip definici\u00f3n:</b> '+w.tip+'</div>'+
+    '<div class="plyo-box"><b>\uD83E\uDD98 '+w.plyo+'</b></div>';
+  var html='';
+  for(var i=0;i<w.exs.length;i++) {
+    var ex=w.exs[i]; var cls=ex.type==='pl'?'eplyo':ex.type==='p'?'eprehab':ex.type==='co'?'ecore':'';
+    var bc=ex.type==='c'?'#E8734A':ex.type==='i'?'#6B8FD4':ex.type==='pl'?'#C45EC4':ex.type==='co'?'#3EC9A7':'#D4A853';
+    var done=(completedSets[ex.id]||0)>=ex.s;
+    html+='<div class="exitem '+cls+'" onclick="gTapEx(\''+ex.id+'\')">'+
+      '<div class="exnum">'+ex.n+'</div><div class="exinfo">'+
+      '<div class="exbadge" style="color:'+bc+'">'+ex.badge+'</div>'+
+      '<h4>'+ex.name+'</h4><div class="exsummary">'+ex.s+' series \u00d7 '+ex.r+' \u00b7 \u23f1 '+ex.rest+' seg</div></div>'+
+      '<div class="excheck'+(done?' done':'')+'" id="chk-'+ex.id+'">'+
+      '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>';
+  }
+  var ei=document.getElementById('exlist-items'); if(ei) ei.innerHTML=html;
+}
+
+// ===================================================
+// EXDETAIL
+// ===================================================
+function gOpenExercise(exid) {
+  var w=DAYS[currentDay]; currentEx=null;
+  for(var i=0;i<w.exs.length;i++) { if(w.exs[i].id===exid){currentEx=w.exs[i];break;} }
+  if(!currentEx) return;
+  if(!completedSets[exid]) completedSets[exid]=0;
+  var bl=document.getElementById('back-day-label'); if(bl) bl.textContent='D\u00eda '+currentDay+' \u00b7 '+w.name;
+  var bc=currentEx.type==='c'?'#E8734A':currentEx.type==='i'?'#6B8FD4':currentEx.type==='pl'?'#C45EC4':currentEx.type==='co'?'#3EC9A7':'#D4A853';
+  var sh='';
+  for(var j=0;j<currentEx.s;j++){
+    var done=j<(completedSets[exid]||0);
+    sh+='<div class="setrow'+(done?' sdone':'')+'" onclick="gTapSet('+j+')">'+
+      '<div class="setnum">'+(j+1)+'</div><div class="setinfo">Serie '+(j+1)+' de '+currentEx.s+
+      '<div class="setreps">'+currentEx.r+' repeticiones \u00b7 '+currentEx.rest+' seg descanso</div></div>'+
+      '<div class="settick"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>';
+  }
+  var dc=document.getElementById('exdetail-content');
+  if(dc) dc.innerHTML=
+    '<div class="exhero"><div class="exhero-badge" style="color:'+bc+'">'+currentEx.badge+'</div>'+
+    '<div class="exhero-name">'+currentEx.name+'</div><div class="exhero-muscle">'+currentEx.muscle+'</div>'+
+    '<div class="exstats"><div class="exstat"><div class="sv" style="color:'+w.color+'">'+currentEx.s+'</div><div class="sl">Series</div></div>'+
+    '<div class="exstat"><div class="sv" style="color:'+w.color+'">'+currentEx.r+'</div><div class="sl">Reps</div></div>'+
+    '<div class="exstat"><div class="sv" style="color:#3EC9A7">'+currentEx.rest+'"</div><div class="sl">Descanso</div></div></div></div>'+
+    '<div class="exnote"><b>\uD83D\uDCDD T\u00e9cnica y notas:</b><br><br>'+currentEx.note+'</div>'+
+    '<div class="sets-title">Seguimiento de series</div>'+sh;
+  gShow('exdetail');
+}
+
+function gHandleSetTap(setIndex) {
+  if(!currentEx) return;
+  var exid=currentEx.id; var done=completedSets[exid]||0;
+  if(setIndex===done){
+    completedSets[exid]=done+1;
+    var rows=document.querySelectorAll('.setrow'); if(rows[setIndex]) rows[setIndex].classList.add('sdone');
+    if(completedSets[exid]>=currentEx.s){
+      setTimeout(function(){gBuildExList(currentDay);gShow('exlist');},500);
+    } else { gStartTimer(currentEx.rest,currentEx.name,setIndex+2,currentEx.s); }
+  } else if(setIndex<done){
+    completedSets[exid]=setIndex;
+    var rows2=document.querySelectorAll('.setrow');
+    for(var i=0;i<rows2.length;i++){if(i>=setIndex)rows2[i].classList.remove('sdone');}
+  }
+}
+
+// ===================================================
+// TIMER
+// ===================================================
+function gStartTimer(secs,exName,nextSet,totalSets){
+  if(timerInterval) clearInterval(timerInterval);
+  timerTotal=secs; timerLeft=secs;
+  var tn=document.getElementById('tnext');
+  if(tn) tn.innerHTML='<b>'+exName+'</b><br>Prepar\u00e1te para la serie '+nextSet+' de '+totalSets;
+  gUpdateTimerUI();
+  var t=document.getElementById('timer'); if(t) t.classList.add('on');
+  timerInterval=setInterval(function(){
+    timerLeft--; gUpdateTimerUI();
+    if(timerLeft<=0){clearInterval(timerInterval);gStopTimer();if(navigator.vibrate)navigator.vibrate([300,100,300]);}
+  },1000);
+}
+function gUpdateTimerUI(){
+  var tnum=document.getElementById('tnum'); if(tnum) tnum.textContent=timerLeft;
+  var prog=document.getElementById('tprog');
+  if(prog){var circ=534;prog.style.strokeDashoffset=circ*(1-timerLeft/timerTotal);}
+}
+
+// ===================================================
+// SPA
+// ===================================================
+function gInitSpa(){
+  var html='';
+  for(var i=0;i<SPA.length;i++){
+    var ph=SPA[i];
+    html+='<div class="sphase'+(ph.star?' star-ph':'')+'">';
+    html+='<div class="sphdr"><div class="spnum">'+ph.n+'</div><div class="spinfo"><h3>'+ph.title+'</h3></div><div class="sptime">'+ph.time+'</div></div>';
+    html+='<div class="spsteps">';
+    for(var j=0;j<ph.steps.length;j++){
+      var s=ph.steps[j];
+      var tH=s.temp?'<span class="temp '+(s.temp==='star'?'star-t':s.temp)+'">'+s.tl+'</span>':(s.tl?'<span style="color:var(--muted);font-size:11px">'+s.tl+'</span>':'');
+      html+='<div class="spstep"><div class="spicon">'+s.i+'</div><div><div class="spname">'+s.name+tH+'</div><div class="spdesc">'+s.desc+'</div></div></div>';
+    }
+    html+='</div></div>';
+  }
+  var sc=document.getElementById('spa-container'); if(sc) sc.innerHTML=html;
+}
+
+// ===================================================
+// HEALTH TABS
+// ===================================================
+function gHealthTab(tab){
+  curHealthTab=tab;
+  var tabs=['fc','ta','blood'];
+  for(var i=0;i<tabs.length;i++){
+    var t=document.getElementById('stab-'+tabs[i]); if(t) t.classList.remove('on');
+    var c=document.getElementById('sc-'+tabs[i]); if(c) c.classList.remove('on');
+  }
+  var at=document.getElementById('stab-'+tab); if(at) at.classList.add('on');
+  var ac=document.getElementById('sc-'+tab); if(ac) ac.classList.add('on');
+}
+
+// ===================================================
+// METRICS
+// ===================================================
+function gCalcMetrics(){
+  var peso=parseFloat(document.getElementById('m-peso').value);
+  var altura=parseFloat(document.getElementById('m-altura').value);
+  var cintura=parseFloat(document.getElementById('m-cintura').value);
+  var cadera=parseFloat(document.getElementById('m-cadera').value);
+  var cuello=parseFloat(document.getElementById('m-cuello').value);
+  var rc=document.getElementById('metrics-results'); if(rc) rc.style.display='none';
+  if(!peso||!altura) return;
+  var imc=peso/((altura/100)*(altura/100));
+  var imcClass=imc<18.5?['Bajo peso','rb-warn']:imc<25?['Normal','rb-ok']:imc<30?['Sobrepeso','rb-warn']:['Obesidad','rb-bad'];
+  var bf=null, bfClass=['—','rb-na'], lm=null, lg=null;
+  if(cintura&&cadera&&cuello&&altura>0){
+    var v=163.205*Math.log10(cintura+cadera-cuello)-97.684*Math.log10(altura)-78.387;
+    bf=Math.max(0,Math.min(60,v));
+    bfClass=bf<25?['Saludable','rb-ok']:bf<32?['Moderado','rb-warn']:['Elevado','rb-bad'];
+    lm=peso*(1-bf/100); lg=peso*(bf/100);
+  }
+  var icc=cadera>0?cintura/cadera:null;
+  var iccClass=icc?( icc<0.8?['Saludable','rb-ok']:icc<0.85?['Moderado','rb-warn']:['Alto riesgo','rb-bad'] ):['—','rb-na'];
+  var ica=altura>0?cintura/altura:null;
+  var icaClass=ica?( ica<0.5?['Saludable','rb-ok']:ica<0.6?['Elevado','rb-warn']:['Alto','rb-bad'] ):['—','rb-na'];
+  var visClass=ica?( ica<0.5?['\uD83D\uDFE2 Baja','rb-ok']:ica<0.6?['\uD83D\uDFE1 Moderada','rb-warn']:['🔴 Elevada','rb-bad'] ):['—','rb-na'];
+
+  function row(label,val,badge){
+    return '<div class="result-row"><span class="r-label">'+label+'</span><div class="r-val"><span class="r-num">'+val+'</span><span class="r-badge '+badge[1]+'">'+badge[0]+'</span></div></div>';
+  }
+  var html=
+    row('IMC',imc.toFixed(1)+' kg/m²',imcClass)+
+    row('% Grasa corporal',bf!==null?(bf.toFixed(1)+'%'):['—','rb-na'][0],bf!==null?bfClass:['—','rb-na'])+
+    row('Masa magra',lm!==null?(lm.toFixed(1)+' kg'):['—','rb-na'][0],lm!==null?['calculado','rb-na']:['—','rb-na'])+
+    row('Masa grasa',lg!==null?(lg.toFixed(1)+' kg'):['—','rb-na'][0],lg!==null?['calculado','rb-na']:['—','rb-na'])+
+    row('Cintura / Cadera (ICC)',icc!==null?icc.toFixed(2):'—',iccClass)+
+    row('Cintura / Altura (ICA)',ica!==null?ica.toFixed(2):'—',icaClass)+
+    row('Grasa visceral estimada',visClass[0].split(' ').slice(1).join(' ')||visClass[0],visClass);
+
+  var rb=document.getElementById('metrics-results-body'); if(rb) rb.innerHTML=html;
+  if(rc) rc.style.display='block';
+}
+
+function gSaveMetrics(){
+  var peso=parseFloat(document.getElementById('m-peso').value);
+  var altura=parseFloat(document.getElementById('m-altura').value);
+  if(!peso||!altura){gToast('\u26a0\ufe0f Ingres\u00e1 al menos peso y altura');return;}
+  var fecha=document.getElementById('m-fecha').value||new Date().toISOString().slice(0,10);
+  var cintura=parseFloat(document.getElementById('m-cintura').value)||null;
+  var cadera=parseFloat(document.getElementById('m-cadera').value)||null;
+  var pecho=parseFloat(document.getElementById('m-pecho').value)||null;
+  var cuello=parseFloat(document.getElementById('m-cuello').value)||null;
+  var muslo=parseFloat(document.getElementById('m-muslo').value)||null;
+  var brazo=parseFloat(document.getElementById('m-brazo').value)||null;
+  var imc=peso/((altura/100)*(altura/100));
+  var bf=null;
+  if(cintura&&cadera&&cuello) bf=Math.max(0,Math.min(60,163.205*Math.log10(cintura+cadera-cuello)-97.684*Math.log10(altura)-78.387));
+  var data=lsGet('gf_metrics');
+  data.unshift({fecha:fecha,peso:peso,altura:altura,cintura:cintura,cadera:cadera,pecho:pecho,cuello:cuello,muslo:muslo,brazo:brazo,imc:parseFloat(imc.toFixed(1)),bf:bf?parseFloat(bf.toFixed(1)):null});
+  if(data.length>20) data=data.slice(0,20);
+  lsSet('gf_metrics',data);
+  gToast('\u2705 Medici\u00f3n guardada');
+  gRefreshMetricsHist();
+}
+
+function gRefreshMetricsHist(){
+  var data=lsGet('gf_metrics');
+  var hw=document.getElementById('metrics-hist-wrap');
+  if(!hw) return;
+  if(data.length===0){hw.style.display='none';return;}
+  hw.style.display='block';
+  var html='<thead><tr><th>Fecha</th><th>Peso</th><th>IMC</th><th>%Grasa</th><th>Cintura</th><th>Cadera</th></tr></thead><tbody>';
+  for(var i=0;i<Math.min(data.length,10);i++){
+    var d=data[i]; var prev=data[i+1];
+    var wt=d.peso!==null?d.peso+'kg':'—';
+    var tClass='trend-eq';
+    if(prev&&prev.peso) tClass=d.peso<prev.peso?'trend-up':'trend-dn';
+    html+='<tr><td>'+d.fecha+'</td><td class="'+tClass+'">'+wt+'</td><td>'+(d.imc||'—')+'</td><td>'+(d.bf!==null?d.bf+'%':'—')+'</td><td>'+(d.cintura||'—')+'</td><td>'+(d.cadera||'—')+'</td></tr>';
+  }
+  html+='</tbody>';
+  var ht=document.getElementById('metrics-hist-table'); if(ht) ht.innerHTML=html;
+}
+
+// ===================================================
+// HEALTH INIT
+// ===================================================
+function gRefreshHealth(){
+  gInitZones();
+  gRefreshFCHist();
+  gRefreshTAHist();
+  gRefreshBloodHist();
+}
+
+function gInitZones(){
+  var fcmax=167;
+  var zones=[
+    {label:'Z1',pct:'50-60%',bpm:Math.round(fcmax*0.5)+'-'+Math.round(fcmax*0.6),color:'#4CAF50',desc:'Recuperaci\u00f3n activa'},
+    {label:'Z2',pct:'60-70%',bpm:Math.round(fcmax*0.6)+'-'+Math.round(fcmax*0.7),color:'#3EC9A7',desc:'Base aer\u00f3bica'},
+    {label:'Z3',pct:'70-80%',bpm:Math.round(fcmax*0.7)+'-'+Math.round(fcmax*0.8),color:'#D4A853',desc:'Umbral aer\u00f3bico'},
+    {label:'Z4',pct:'80-90%',bpm:Math.round(fcmax*0.8)+'-'+Math.round(fcmax*0.9),color:'#E8734A',desc:'Umbral anaer\u00f3bico'},
+    {label:'Z5',pct:'90-100%',bpm:Math.round(fcmax*0.9)+'-'+fcmax,color:'#E84A4A',desc:'M\u00e1ximo'}
+  ];
+  var html='';
+  for(var i=0;i<zones.length;i++){
+    var z=zones[i];
+    html+='<div class="zone-row">'+
+      '<span class="zone-label" style="color:'+z.color+'">'+z.label+'</span>'+
+      '<div class="zone-bar" style="background:'+z.color+'33;position:relative;overflow:hidden">'+
+      '<div style="position:absolute;left:0;top:0;bottom:0;width:'+(20*(i+1))+'%;background:'+z.color+'55;border-radius:100px"></div></div>'+
+      '<span class="zone-range" style="color:'+z.color+'">'+z.bpm+' bpm</span>'+
+      '</div>';
+  }
+  var zb=document.getElementById('zone-bars'); if(zb) zb.innerHTML=html;
+}
+
+// FC
+function gSaveFC(){
+  var fecha=document.getElementById('fc-fecha').value||new Date().toISOString().slice(0,10);
+  var rep=parseFloat(document.getElementById('fc-reposo').value);
+  var act=parseFloat(document.getElementById('fc-actividad').value);
+  var notas=document.getElementById('fc-notas').value;
+  if(!rep&&!act){gToast('\u26a0\ufe0f Ingres\u00e1 al menos un valor de FC');return;}
+  var data=lsGet('gf_fc');
+  data.unshift({fecha:fecha,reposo:rep||null,actividad:act||null,notas:notas});
+  if(data.length>20) data=data.slice(0,20);
+  lsSet('gf_fc',data);
+  gToast('\u2705 FC guardada');
+  gRefreshFCHist();
+}
+function gRefreshFCHist(){
+  var data=lsGet('gf_fc');
+  var hw=document.getElementById('fc-hist-wrap'); if(!hw) return;
+  if(data.length===0){hw.style.display='none';return;}
+  hw.style.display='block';
+  var html='<thead><tr><th>Fecha</th><th>Reposo</th><th>Actividad</th><th>Notas</th></tr></thead><tbody>';
+  for(var i=0;i<Math.min(data.length,8);i++){
+    var d=data[i];
+    html+='<tr><td>'+d.fecha+'</td><td>'+(d.reposo?d.reposo+' bpm':'—')+'</td><td>'+(d.actividad?d.actividad+' bpm':'—')+'</td><td style="color:var(--muted)">'+(d.notas||'')+'</td></tr>';
+  }
+  html+='</tbody>';
+  var ht=document.getElementById('fc-hist-table'); if(ht) ht.innerHTML=html;
+}
+
+// TA
+function gClassTA(s,d){
+  if(!s||!d) return ['—','rb-na'];
+  if(s>180||d>120) return ['Crisis hipertensiva','rb-bad'];
+  if(s>=140||d>=90) return ['HTA Grado II','rb-bad'];
+  if(s>=130||d>=80) return ['HTA Grado I','rb-warn'];
+  if(s>=120&&d<80) return ['Elevada','rb-warn'];
+  return ['Normal','rb-ok'];
+}
+function gSaveTA(){
+  var fecha=document.getElementById('ta-fecha').value||new Date().toISOString().slice(0,10);
+  var sis=parseFloat(document.getElementById('ta-sis').value);
+  var dia=parseFloat(document.getElementById('ta-dia').value);
+  var notas=document.getElementById('ta-notas').value;
+  if(!sis||!dia){gToast('\u26a0\ufe0f Ingres\u00e1 sistólica y diast\u00f3lica');return;}
+  var cls=gClassTA(sis,dia);
+  var data=lsGet('gf_ta');
+  data.unshift({fecha:fecha,sis:sis,dia:dia,notas:notas,cls:cls[0]});
+  if(data.length>20) data=data.slice(0,20);
+  lsSet('gf_ta',data);
+  gToast('\u2705 Tensi\u00f3n guardada');
+  var tr=document.getElementById('ta-result'); var tb=document.getElementById('ta-badge');
+  if(tr){tr.style.display='block';} if(tb){tb.textContent=cls[0];tb.className='r-badge '+cls[1];}
+  gRefreshTAHist();
+}
+function gRefreshTAHist(){
+  var data=lsGet('gf_ta');
+  var hw=document.getElementById('ta-hist-wrap'); if(!hw) return;
+  if(data.length===0){hw.style.display='none';return;}
+  hw.style.display='block';
+  var html='<thead><tr><th>Fecha</th><th>Sist\u00f3lica</th><th>Diast\u00f3lica</th><th>Clasificaci\u00f3n</th></tr></thead><tbody>';
+  for(var i=0;i<Math.min(data.length,8);i++){
+    var d=data[i];
+    html+='<tr><td>'+d.fecha+'</td><td>'+d.sis+' mmHg</td><td>'+d.dia+' mmHg</td><td>'+(d.cls||'—')+'</td></tr>';
+  }
+  html+='</tbody>';
+  var ht=document.getElementById('ta-hist-table'); if(ht) ht.innerHTML=html;
+}
+
+// BLOOD
+function gInitBloodForm(){
+  var cont=document.getElementById('blood-form-container'); if(!cont) return;
+  var html='';
+  for(var i=0;i<BLOOD_CATS.length;i++){
+    var cat=BLOOD_CATS[i];
+    var isWarn=cat.id==='coagul';
+    html+='<div class="blood-cat'+(isWarn?' open':'')+'">'+
+      '<div class="blood-cat-hdr" onclick="gToggleBloodCat(this)">'+
+      '<div class="bch-left"><div class="bch-icon">'+cat.icon+'</div><div class="bch-title">'+cat.title+'</div></div>'+
+      '<div class="bch-arr">\u2304</div></div>'+
+      '<div class="blood-cat-body">';
+    for(var j=0;j<cat.fields.length;j++){
+      var f=cat.fields[j];
+      var refTxt=f.min===0?('< '+f.max):(f.max===999?('>'+f.min):(f.min+' – '+f.max))+' '+f.unit;
+      if(f.note) refTxt+=' · '+f.note;
+      html+='<div class="bv-row">'+
+        '<div class="bv-dot" id="bdot-'+f.id+'"></div>'+
+        '<div class="bv-info"><div class="bv-name">'+f.name+'</div><div class="bv-ref">Ref: '+refTxt+'</div></div>'+
+        '<input class="bv-inp" type="number" step="0.01" id="bi-'+f.id+'" placeholder="—" oninput="gUpdateBvDot(\''+f.id+'\','+f.min+','+f.max+')" />'+
+        '<div class="bv-unit">'+f.unit+'</div>'+
+        '</div>';
+    }
+    html+='</div></div>';
+  }
+  cont.innerHTML=html;
+}
+
+function gToggleBloodCat(hdr){
+  var cat=hdr.parentElement; cat.classList.toggle('open');
+}
+
+function gUpdateBvDot(id,min,max){
+  var inp=document.getElementById('bi-'+id); var dot=document.getElementById('bdot-'+id);
+  if(!inp||!dot) return;
+  var v=parseFloat(inp.value);
+  if(isNaN(v)){dot.className='bv-dot';return;}
+  if(v>=min&&v<=max) dot.className='bv-dot ok';
+  else if(v<min*0.9||v>max*1.15) dot.className='bv-dot bad';
+  else dot.className='bv-dot warn';
+}
+
+function gSaveBlood(){
+  var fecha=document.getElementById('bl-fecha').value||new Date().toISOString().slice(0,10);
+  var entry={fecha:fecha};
+  var hasAny=false;
+  for(var i=0;i<BLOOD_CATS.length;i++){
+    for(var j=0;j<BLOOD_CATS[i].fields.length;j++){
+      var f=BLOOD_CATS[i].fields[j];
+      var inp=document.getElementById('bi-'+f.id);
+      if(inp&&inp.value!==''){entry[f.id]=parseFloat(inp.value);hasAny=true;}
+    }
+  }
+  if(!hasAny){gToast('\u26a0\ufe0f Ingres\u00e1 al menos un valor');return;}
+  var data=lsGet('gf_blood');
+  data.unshift(entry);
+  if(data.length>10) data=data.slice(0,10);
+  lsSet('gf_blood',data);
+  gToast('\u2705 An\u00e1lisis guardado');
+  gRefreshBloodHist();
+}
+
+function gRefreshBloodHist(){
+  var data=lsGet('gf_blood');
+  var hw=document.getElementById('blood-hist-wrap'); if(!hw) return;
+  if(data.length===0){hw.style.display='none';return;}
+  hw.style.display='block';
+  var body=document.getElementById('blood-hist-body'); if(!body) return;
+  var html='';
+  for(var i=0;i<Math.min(data.length,3);i++){
+    var d=data[i];
+    html+='<div style="background:var(--surface2);border-radius:13px;padding:12px 14px;margin-bottom:8px">'+
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:700">\uD83D\uDCC5 '+d.fecha+'</div>';
+    var entries=[]; var keys=Object.keys(d);
+    for(var k=0;k<keys.length;k++){
+      if(keys[k]==='fecha') continue;
+      // Find field def
+      var fname=keys[k]; var fobj=null;
+      for(var ci=0;ci<BLOOD_CATS.length&&!fobj;ci++){
+        for(var fi=0;fi<BLOOD_CATS[ci].fields.length&&!fobj;fi++){
+          if(BLOOD_CATS[ci].fields[fi].id===fname) fobj=BLOOD_CATS[ci].fields[fi];
+        }
+      }
+      if(fobj){
+        var v=d[fname]; var status='';
+        if(v>=fobj.min&&v<=fobj.max) status=' style="color:var(--green)"';
+        else if(v<fobj.min*0.9||v>fobj.max*1.15) status=' style="color:var(--red)"';
+        else status=' style="color:var(--yellow)"';
+        entries.push('<span style="display:inline-flex;align-items:center;gap:4px;margin:3px;background:var(--surface);padding:4px 8px;border-radius:8px;font-size:11px">'+
+          '<span'+status+'>'+fobj.name+': '+v+' '+fobj.unit+'</span></span>');
+      }
+    }
+    html+=entries.join('')+'</div>';
+  }
+  body.innerHTML=html;
+}
+
+// ===================================================
+// TOAST
+// ===================================================
+function gToast(msg){
+  var t=document.getElementById('toast'); if(!t) return;
+  t.textContent=msg; t.classList.add('on');
+  setTimeout(function(){t.classList.remove('on');},2200);
+}
+
+// ===================================================
+// DATE DEFAULTS
+// ===================================================
+function gSetDateDefaults(){
+  var today=new Date().toISOString().slice(0,10);
+  var ids=['m-fecha','fc-fecha','ta-fecha','bl-fecha'];
+  for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el)el.value=today;}
+}
+
+// ===================================================
+// BOOT
+// ===================================================
+gInitHome();
+gInitTrainScreen();
+gInitSpa();
+gInitBloodForm();
+gSetDateDefaults();
+gRefreshMetricsHist();
+gRefreshFCHist();
+gRefreshTAHist();
+gRefreshBloodHist();
+
+</script>
+</body>
+</html>
