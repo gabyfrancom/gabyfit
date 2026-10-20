@@ -57,6 +57,11 @@ class HealthReader(context: Context) {
             page.records.forEach { r -> val key="Entrenamientos · ${r.metadata.dataOrigin.packageName}"; sessions[key]=(sessions[key]?:0)+1 }
             token=page.pageToken
         } while(token!=null)
+        val extras = sortedMapOf<String,Int>()
+        val missing = ExtraHealthMetrics.read(client) { r ->
+            val key = "${r.getString("metric")} · ${r.getString("source")}"
+            extras[key] = (extras[key] ?: 0) + 1
+        }
         return buildString {
             appendLine("DIAGNÓSTICO DE LOS ÚLTIMOS 7 DÍAS")
             appendLine("PASOS (por fuente; podrían solaparse):")
@@ -66,6 +71,10 @@ class HealthReader(context: Context) {
             if (heart.isEmpty()) appendLine("Sin registros")
             heart.forEach { (source, value) -> appendLine("$source: $value") }
             sessions.forEach { (source,count) -> appendLine("$source: $count sesiones") }
+            appendLine("MÉTRICAS ADICIONALES (registros por origen):")
+            extras.forEach { (key,count) -> appendLine("$key: $count") }
+            if (extras.isEmpty()) appendLine("Sin registros adicionales con los permisos concedidos")
+            if (missing.isNotEmpty()) appendLine("Sin permiso: ${missing.joinToString()}")
             appendLine("Este diagnóstico no envía datos. Usa Sincronizar solo si autorizas el envío a staging.")
         }
     }

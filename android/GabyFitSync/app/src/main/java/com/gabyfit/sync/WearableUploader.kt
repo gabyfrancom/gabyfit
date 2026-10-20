@@ -100,6 +100,8 @@ class WearableUploader(context: Context) {
                 read(SleepSessionRecord::class) { r -> queue.put(row(r.metadata.dataOrigin.packageName,r.metadata.id,"sleep_duration",r.startTime,r.endTime,Duration.between(r.startTime,r.endTime).toMillis()/60000.0,"minutes")) }
                 total += drain()
                 read(ExerciseSessionRecord::class) { r -> queue.put(row(r.metadata.dataOrigin.packageName,r.metadata.id,"workout_duration",r.startTime,r.endTime,Duration.between(r.startTime,r.endTime).toMillis()/60000.0,"minutes")) }
+                total += drain()
+                ExtraHealthMetrics.read(health) { queue.put(it) }
                 total + drain()
             }
         } finally { lock.unlock() }

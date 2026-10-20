@@ -32,7 +32,7 @@ class MainActivity: ComponentActivity() {
     private val launcher = registerForActivityResult(
         PermissionController.createRequestPermissionResultContract()
     ) { granted -> status.text = if (granted.containsAll(basePermissions))
-        "Permisos de pasos, pulso, sueño y entrenamientos aceptados" else "Permisos incompletos" }
+        "Permisos básicos aceptados. Las métricas adicionales se leen solo con su permiso." else "Permisos incompletos" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +51,7 @@ class MainActivity: ComponentActivity() {
         button("1 · Solicitar permisos") {
             if (HealthConnectClient.getSdkStatus(this) != HealthConnectClient.SDK_AVAILABLE) {
                 status.text = "Health Connect no está disponible o requiere actualización"
-            } else launcher.launch(basePermissions)
+            } else launcher.launch(basePermissions + ExtraHealthMetrics.permissions)
         }
         button("2 · Diagnosticar fuentes (7 días)") {
             lifecycleScope.launch {
@@ -73,7 +73,7 @@ class MainActivity: ComponentActivity() {
                     HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_IN_BACKGROUND
                 )
                 if (feature == HealthConnectFeatures.FEATURE_STATUS_AVAILABLE) {
-                    launcher.launch(basePermissions + HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND)
+                    launcher.launch(basePermissions + ExtraHealthMetrics.permissions + HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND)
                 } else status.text = "Lectura en segundo plano no compatible"
             }
         }
