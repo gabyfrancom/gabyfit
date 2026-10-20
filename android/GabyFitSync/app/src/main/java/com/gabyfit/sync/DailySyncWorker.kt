@@ -6,11 +6,16 @@ import androidx.health.connect.client.HealthConnectFeatures
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.BackoffPolicy
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -22,14 +27,16 @@ class DailySyncWorker(context: Context, params: WorkerParameters): CoroutineWork
             val client = HealthConnectClient.getOrCreate(applicationContext)
             val required = setOf(
                 HealthPermission.getReadPermission(StepsRecord::class),
+                HealthPermission.getReadPermission(SleepSessionRecord::class),
+                HealthPermission.getReadPermission(ExerciseSessionRecord::class),
                 HealthPermission.getReadPermission(HeartRateRecord::class),
                 HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND
             )
             if (!client.permissionController.getGrantedPermissions().containsAll(required)) {
                 Result.failure()
             } else {
-                // Temporary local diagnostic, without logging or transmitting health values.
-                HealthReader(applicationContext).diagnose()
+                // Envío a staging, sin datos de salud en Logcat.
+                WearableUploader(applicationContext).upload()
                 Result.success()
             }
         }
@@ -45,11 +52,15 @@ class DailySyncWorker(context: Context, params: WorkerParameters): CoroutineWork
 fun scheduleDailySync(context: Context) {
     if (HealthConnectClient.getSdkStatus(context) != HealthConnectClient.SDK_AVAILABLE) return
     val client = HealthConnectClient.getOrCreate(context)
-    if (client.features.getFeatureStatus(
+    val availability = client.features.getFeatureStatus(
         HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_IN_BACKGROUND
-    ) != HealthConnectFeatures.FEATURE_STATUS_AVAILABLE) return
-    val request = PeriodicWorkRequestBuilder<DailySyncWorker>(24, TimeUnit.HOURS).build()
+    )
+    if (availability != HealthConnectFeatures.FEATURE_STATUS_AVAILABLE) return
+    val request = PeriodicWorkRequestBuilder<DailySyncWorker>(24, TimeUnit.HOURS)
+        .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+        .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS).build()
+    WorkManager.getInstance(context).cancelUniqueWork("gabyfit_daily_diagnostic")
     WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-        "gabyfit_daily_diagnostic", ExistingPeriodicWorkPolicy.KEEP, request
+        "gabyfit_daily_sync", ExistingPeriodicWorkPolicy.UPDATE, request
     )
 }
