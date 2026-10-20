@@ -20,6 +20,7 @@ import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 
 class MainActivity: ComponentActivity() {
     private var syncInProgress = false
@@ -155,9 +156,8 @@ class MainActivity: ComponentActivity() {
             lifecycleScope.launch {
                 val last = secure.get("last_daily_success_at") ?: "Todavía sin envío automático confirmado"
                 val count = secure.get("last_daily_count") ?: "—"
-                val work = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    androidx.work.WorkManager.getInstance(this@MainActivity).getWorkInfosForUniqueWork("gabyfit_daily_sync").get()
-                }
+                val work = androidx.work.WorkManager.getInstance(this@MainActivity)
+                    .getWorkInfosForUniqueWorkFlow("gabyfit_daily_sync").first()
                 status.text = "Tarea diaria: " + (work.firstOrNull()?.state?.toString() ?: "No programada") +
                     "\nÚltimo envío automático completado: " + last + "\nRegistros confirmados: " + count
             }

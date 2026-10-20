@@ -29,7 +29,7 @@ export async function verifyToken(token,fetcher=fetch){
  }
  let keys;
  if(fetcher===fetch&&cache&&cache.until>Date.now())keys=cache.keys;
- else{const res=await fetcher(JWKS,{redirect:'error',signal:AbortSignal.timeout(8000)});if(!res.ok)throw Error('jwks');const text=await res.text();if(text.length>100000)throw Error('jwks');const j=JSON.parse(text);if(!Array.isArray(j.keys)||j.keys.length>32)throw Error('jwks');keys=j.keys;if(fetcher===fetch)cache={keys,until:Date.now()+300000};}
+ else{const res=await fetcher(JWKS,{redirect:'manual',signal:AbortSignal.timeout(8000)});if(!res.ok)throw Error('jwks');const text=await res.text();if(text.length>100000)throw Error('jwks');const j=JSON.parse(text);if(!Array.isArray(j.keys)||j.keys.length>32)throw Error('jwks');keys=j.keys;if(fetcher===fetch)cache={keys,until:Date.now()+300000};}
  const jwk=keys.find(k=>k.kid===h.kid&&k.kty==='RSA'&&k.alg==='RS256'&&(!k.use||k.use==='sig'));if(!jwk)throw Error('kid');
  const key=await crypto.subtle.importKey('jwk',jwk,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
  if(!await crypto.subtle.verify('RSASSA-PKCS1-v1_5',key,bytes(parts[2]),new TextEncoder().encode(parts[0]+'.'+parts[1])))throw Error('signature');
@@ -41,7 +41,7 @@ export default {async fetch(request,env){
  if(request.method!=='POST')return reject('method',405);
  const a=request.headers.get('authorization')||'';
  if(!a.startsWith('Bearer '))return reject('unauthorized',401);
- try{await verifyToken(a.slice(7));}catch(e){return reject('unauthorized:'+String(e.message).slice(0,100),401);}
+ try{await verifyToken(a.slice(7));}catch{return reject('unauthorized',401);}
  if(!env.SIGNING_P12||!env.SIGNING_PASSWORD)return reject('unavailable',503);
  return new Response(JSON.stringify({keystore_b64:env.SIGNING_P12,password:env.SIGNING_PASSWORD,key_alias:'gabyfit-v2',certificate_sha256:'bd73cb2df937dc23bc1cab74ef62ab940de13eeb2b5be9091d11a93743663855'}),{headers:HEADERS});
 }};
