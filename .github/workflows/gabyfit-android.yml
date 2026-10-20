@@ -1,0 +1,109 @@
+name: GabyFit Android staging APK
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feature/gabyfit-health-connect-sync']
+    paths: ['android/GabyFitSync/**', '.github/workflows/gabyfit-android.yml']
+  pull_request:
+    paths: ['android/GabyFitSync/**', '.github/workflows/gabyfit-android.yml']
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: android/GabyFitSync
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install SDK 36
+        run: |
+          SDKMANAGER=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          test -n "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+      - name: Gradle 8.11.1 with checksum validation
+        run: |
+          curl --fail --location https://services.gradle.org/distributions/gradle-8.11.1-bin.zip -o /tmp/gradle.zip
+          curl --fail --location https://services.gradle.org/distributions/gradle-8.11.1-bin.zip.sha256 -o /tmp/gradle.sha256
+          printf '%s  /tmp/gradle.zip\n' "$(cat /tmp/gradle.sha256)" | sha256sum --check
+          unzip -q /tmp/gradle.zip -d /tmp
+      - name: Validate contract, signing security and deduplication
+        working-directory: ${{ github.workspace }}
+        run: |
+          node integration/wearables/contract.test.mjs
+          python3 integration/wearables/schema_test.py
+          node android/GabyFitSync/signing/worker.test.mjs
+          python3 android/GabyFitSync/signing/ledger_test.py
+      - name: Retrieve stable signing key with GitHub OIDC
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feature/gabyfit-health-connect-sync'
+        run: node signing/fetch-signing.mjs
+      - name: Compile and lint
+        env:
+          TRUSTED_PUSH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/feature/gabyfit-health-connect-sync' }}
+        run: |
+          if [ "$TRUSTED_PUSH" = "true" ]; then
+            test -f "$GABYFIT_KEYSTORE_PATH"
+            /tmp/gradle-8.11.1/bin/gradle --no-daemon :app:assembleRelease :app:lintRelease
+          else
+            /tmp/gradle-8.11.1/bin/gradle --no-daemon :app:assembleDebug :app:lintDebug
+          fi
+      - name: Verify APK, package and signing certificate
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          TRUSTED_PUSH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/feature/gabyfit-health-connect-sync' }}
+          EXPECTED_CERT_SHA256: bd73cb2df937dc23bc1cab74ef62ab940de13eeb2b5be9091d11a93743663855
+        run: |
+          mkdir -p dist
+          if [ "$TRUSTED_PUSH" = "true" ]; then
+            cp app/build/outputs/apk/release/app-release.apk dist/GabyFitSync2-staging.apk
+          else
+            cp app/build/outputs/apk/debug/app-debug.apk dist/GabyFitSync2-staging.apk
+          fi
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs dist/GabyFitSync2-staging.apk > dist/APK-SIGNATURE.txt
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging dist/GabyFitSync2-staging.apk > dist/APK-METADATA.txt
+          python3 signing/verify-artifact.py
+          printf '%s\n' "$SOURCE_SHA" > dist/SOURCE-COMMIT.txt
+          cd dist
+          sha256sum GabyFitSync2-staging.apk > SHA256SUMS.txt
+      - name: Remove signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/gabyfit-signing.p12"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GabyFitSync2-staging-apk
+          path: android/GabyFitSync/dist/*
+          if-no-files-found: error
+          retention-days: 90
+  durable-download:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/gabyfit-health-connect-sync'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: GabyFitSync2-staging-apk
+          path: dist
+      - name: Publish persistent prerelease assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          TAG="gabyfit-sync-staging-${SOURCE_SHA:0:12}"
+          printf 'GabyFit Sync 2, paquete com.gabyfit.sync.v2. Instalar junto a la app anterior, sin desinstalarla. Importar configuracion privada. Firma estable verificada. Commit: %s. Prueba fisica pendiente. Assets sin caducidad automatica de Actions.\n' "$SOURCE_SHA" > notes.txt
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --target "$SOURCE_SHA" --prerelease --title "GabyFit Sync 2 - 0.5 ${SOURCE_SHA:0:12}" --notes-file notes.txt
+          fi
+          gh release upload "$TAG" dist/* --clobber

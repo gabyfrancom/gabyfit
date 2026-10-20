@@ -1,0 +1,19 @@
+import {writeFile,appendFile} from 'node:fs/promises';
+const audience='gabyfit-android-signing';
+const url=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+url.searchParams.set('audience',audience);
+const oidc=await fetch(url,{headers:{Authorization:'Bearer '+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN},redirect:'error'});
+if(!oidc.ok)throw Error('OIDC token request failed: '+oidc.status);
+const {value:token}=await oidc.json();
+if(typeof token!=='string')throw Error('Missing OIDC token');
+const res=await fetch('https://gabyfit-apk-signer.gaby-franco.workers.dev/signing-material',{method:'POST',headers:{Authorization:'Bearer '+token},redirect:'error',signal:AbortSignal.timeout(20000)});
+if(!res.ok){const detail=await res.json().catch(()=>({}));throw Error('Signing authorization failed: '+res.status+' '+String(detail.error||'').slice(0,120));}
+const material=await res.json();
+const expected='bd73cb2df937dc23bc1cab74ef62ab940de13eeb2b5be9091d11a93743663855';
+if(material.certificate_sha256!==expected||material.key_alias!=='gabyfit-v2'||typeof material.password!=='string'||!material.password.match(/^[A-Za-z0-9_-]{32,100}$/)||typeof material.keystore_b64!=='string'||material.keystore_b64.length>20000)throw Error('Invalid signing material');
+console.log('::add-mask::'+material.password);
+console.log('::add-mask::'+material.keystore_b64);
+const path=process.env.RUNNER_TEMP+'/gabyfit-signing.p12';
+await writeFile(path,Buffer.from(material.keystore_b64,'base64'),{mode:0o600});
+await appendFile(process.env.GITHUB_ENV,'GABYFIT_KEYSTORE_PATH='+path+'\nGABYFIT_KEYSTORE_PASSWORD='+material.password+'\n');
+console.log('Stable signing material loaded for authorized branch.');
