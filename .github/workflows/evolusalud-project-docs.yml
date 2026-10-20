@@ -1,0 +1,15 @@
+name: EvoluSalud project memory
+on:
+  push:
+    paths: ['docs/evolusalud-project/**', '.github/workflows/evolusalud-project-docs.yml']
+  pull_request:
+    paths: ['docs/evolusalud-project/**', '.github/workflows/evolusalud-project-docs.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check dashboard JavaScript and embedded memory
+        run: node docs/evolusalud-project/verify.mjs
