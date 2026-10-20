@@ -42,7 +42,7 @@ class WearableUploader(context: Context) {
         JSONObject().put("source", source).put("source_record_id", id).put("metric", metric)
             .put("start_time", start.toString()).put("end_time", end.toString()).put("value", value).put("unit", unit)
 
-    suspend fun upload(): Int = withContext(Dispatchers.IO) {
+    suspend fun upload(onProgress: (Int) -> Unit = {}): Int = withContext(Dispatchers.IO) {
         lock.lock()
         try {
             val endpoint = config.get("endpoint").orEmpty().trimEnd('/')
@@ -52,6 +52,7 @@ class WearableUploader(context: Context) {
             val clientSecret = config.get("cf_client_secret").orEmpty()
             if (bearer.length < 32 || clientId.isBlank() || clientSecret.isBlank()) throw PermanentSyncException("Importa las credenciales del móvil")
             PendingQueue(app).use { queue ->
+                var confirmed = 0
                 suspend fun drain(): Int {
                     var sent = 0
                     while (true) {
@@ -68,7 +69,7 @@ class WearableUploader(context: Context) {
                             connection.requestMethod = "POST"
                             connection.connectTimeout = 20000; connection.readTimeout = 20000
                             connection.doOutput = true
-                            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) GabyFitSync/0.2")
+                            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) GabyFitSync/0.4")
                             connection.setRequestProperty("Content-Type", "application/json")
                             connection.setRequestProperty("Authorization", "Bearer $bearer")
                             connection.setRequestProperty("CF-Access-Client-Id", clientId)
@@ -87,6 +88,8 @@ class WearableUploader(context: Context) {
                                 throw IOException("Acuse de recibo inválido; se conserva la cola")
                             queue.acknowledge(chunk)
                             sent += chunk.size
+                            confirmed += chunk.size
+                            withContext(Dispatchers.Main) { onProgress(confirmed) }
                         } finally { connection.disconnect() }
                     }
                 }

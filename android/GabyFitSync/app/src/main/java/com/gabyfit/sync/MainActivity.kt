@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
 class MainActivity: ComponentActivity() {
+    private var syncInProgress = false
     private lateinit var status: TextView
     private val basePermissions = setOf(
         HealthPermission.getReadPermission(StepsRecord::class),
@@ -131,16 +132,21 @@ class MainActivity: ComponentActivity() {
         button("Detener sincronización diaria") { androidx.work.WorkManager.getInstance(this).cancelUniqueWork("gabyfit_daily_sync"); status.text = "Sincronización diaria detenida" }
         button("6 · Sincronizar ahora") {
             lifecycleScope.launch {
+                if (syncInProgress) return@launch
+                syncInProgress = true
                 try {
                     val client = HealthConnectClient.getOrCreate(this@MainActivity)
                     if (!client.permissionController.getGrantedPermissions().containsAll(basePermissions)) {
                         status.text = "Concede primero permisos de lectura"
                     } else {
                         status.text = "Enviando registros..."
-                        val sent = WearableUploader(this@MainActivity).upload()
+                        val sent = WearableUploader(this@MainActivity).upload { confirmed ->
+                            status.text = "Registros confirmados: $confirmed. Continúa la sincronización…"
+                        }
                         status.text = "Registros enviados: $sent"
                     }
                 } catch (e: Exception) { status.text = "No se completó el envío: ${e.localizedMessage}" }
+                finally { syncInProgress = false }
             }
         }
         button("Privacidad") { startActivity(Intent(this, PrivacyActivity::class.java)) }
