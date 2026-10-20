@@ -3,9 +3,9 @@
 **Tipo:** memoria técnica para continuar el proyecto. Estado documentado; no monitorización en tiempo real.
 
 ## 1. Resultado y límite actual
-EvoluSalud está publicada en Cloudflare Workers y utiliza D1. Existe recepción comprobada en producción de pasos y pulso procedentes de Zepp. El lector Android 0.4 y los servidores aceptan métricas adicionales; su llegada real depende de permisos y de que la aplicación de origen las escriba en Health Connect.
+EvoluSalud está publicada en Cloudflare Workers y utiliza D1. Existe recepción comprobada en producción de pasos, pulso y sesiones de sueño procedentes de Zepp. La usuaria confirmó la actualización de datos en Cuerpo tras finalizar el envío. El lector Android 0.5 y los servidores aceptan métricas adicionales; su llegada real depende de permisos y de que la aplicación de origen las escriba en Health Connect.
 
-**La integración completa aún no está cerrada:** faltan instalación y validación física de la versión 0.4, comprobar cada origen adicional, su visualización autenticada y la repetición periódica sin duplicados. No confundir formularios, compilación o pruebas sintéticas con datos reales de todas las métricas.
+**La integración completa aún no está cerrada:** faltan instalación y validación física de la versión 0.5, comprobar cada origen adicional, su visualización autenticada y la repetición periódica sin duplicados. No confundir formularios, compilación o pruebas sintéticas con datos reales de todas las métricas.
 
 Se guardó además un entrenamiento a partir de capturas facilitadas por la usuaria. Conserva fecha, procedencia manual y límites de transcripción. No se presenta como sincronización automática.
 
@@ -28,12 +28,12 @@ Amazfit Active 2 (Round) → Zepp → Android Health Connect → GabyFit Sync �
 | Rama | `feature/gabyfit-health-connect-sync` |
 | PR de desarrollo | https://github.com/gabyfrancom/gabyfit/pull/1 |
 | Estado PR al corte | Abierto, borrador y sin fusionar |
-| Android actual | `0.4.0-staging`, versionCode 4 |
-| Commit del APK | `42a02b541cadc1db8539aceb0643cfce7b348266` |
-| Compilación y pruebas | https://github.com/gabyfrancom/gabyfit/actions/runs/39479189911 |
-| Release duradera | https://github.com/gabyfrancom/gabyfit/releases/tag/gabyfit-sync-staging-42a02b541cad |
-| APK | https://github.com/gabyfrancom/gabyfit/releases/download/gabyfit-sync-staging-42a02b541cad/GabyFitSync-staging.apk |
-| SHA-256 APK publicado | `3f624e8563337d99af4386e80235b5571714188f4eb39c5a52026b04eec43778` |
+| Android actual | `0.5.0-staging`, versionCode 5 |
+| Commit del APK | `7b543c1023331518614351376c9fccd0f571a157` |
+| Compilación y pruebas | https://github.com/gabyfrancom/gabyfit/actions/runs/39490353975 |
+| Release duradera | https://github.com/gabyfrancom/gabyfit/releases/tag/gabyfit-sync-staging-7b543c102333 |
+| APK | https://github.com/gabyfrancom/gabyfit/releases/download/gabyfit-sync-staging-7b543c102333/GabyFitSync2-staging.apk |
+| SHA-256 APK publicado | `2ab6f7ece0e2fc4a95c4a11b66cf663200ae7fd691a9ad3a049f414ed892ffc6` |
 | Despliegue funcional anterior a esta memoria | `6cd917d7347f4117a7877e4cf10addb6` |
 
 La Release incluye APK-SIGNATURE.txt, SOURCE-COMMIT.txt y SHA256SUMS.txt. Los assets de Release no tienen la caducidad automática de Actions; no se promete conservación eterna si se elimina el repositorio o la Release. Los artefactos temporales de Actions conservan su retención propia.
@@ -60,7 +60,10 @@ La Release incluye APK-SIGNATURE.txt, SOURCE-COMMIT.txt y SHA256SUMS.txt. Los as
 - HTTPS, sin redirecciones y sin secretos incluidos en el APK.
 - WorkManager con conectividad y reintentos.
 - Envío manual con progreso de registros confirmados y bloqueo de pulsaciones repetidas.
-- APK 0.4 compilado y publicado en Release duradera.
+- Registro local de acuses: se omiten entradas sin cambios ya confirmadas; los cambios vuelven a enviarse. Acuse y retirada de cola son transaccionales.
+- Estado de la tarea y fecha del último envío automático completado visibles en la aplicación.
+- Sync 2 usa el paquete separado `com.gabyfit.sync.v2`: se instala al lado de la anterior y requiere importar el archivo privado y conceder permisos de nuevo.
+- APK 0.5 compilado y publicado en Release duradera.
 
 ### Interfaz EvoluSalud
 - Datos del reloj integrados en Cuerpo y contexto de nutrición y cardiovascular.
@@ -76,10 +79,10 @@ La Release incluye APK-SIGNATURE.txt, SOURCE-COMMIT.txt y SHA256SUMS.txt. Los as
 ## 5. Contrato de métricas
 | Grupo | Métricas | Estado al corte |
 | --- | --- | --- |
-| Recepción real comprobada | Pasos; frecuencia cardíaca | En producción desde Zepp |
-| Básicas aún por confirmar en teléfono actual | Duración de sesión de sueño; duración de entrenamiento | Lector y backend disponibles; sin evidencia real nueva en producción |
+| Recepción real comprobada | Pasos; frecuencia cardíaca; sesiones de sueño | En producción desde Zepp; datos actualizados en Cuerpo según confirmación de la usuaria |
+| Básica aún por confirmar | Duración de entrenamiento | Lector y backend disponibles; sin evidencia real nueva de esta métrica en producción |
 | Salud y energía opcionales | SpO₂; FC en reposo; distancia; energía activa; energía total; HRV RMSSD; respiración; VO₂máx; peso; grasa; temperatura | Preparadas; llegada real pendiente |
-| Nuevas deportivas 0.4 | Velocidad; cadencia; potencia; ascenso | Android, almacenamiento e interfaz preparados; prueba física pendiente |
+| Nuevas deportivas 0.5 | Velocidad; cadencia; potencia; ascenso | Android, almacenamiento e interfaz preparados; prueba física pendiente |
 | Detalle manual | Ritmos; pulso medio/máximo; elevación; zancada; oscilación; contacto con suelo; carga y efectos de Zepp | Formulario y registro por sesión |
 | No inferidos | Presión arterial; INR; glucosa; RPE ausente; VO₂máx medido a partir de zonas | No se fabrican ni autocompletan sin fuente |
 
@@ -113,7 +116,7 @@ Referencias de las herramientas:
 | Verificación | Resultado / alcance |
 | --- | --- |
 | Compilación SDK36 y lint Android | Aprobados en Actions del commit indicado |
-| Firma APK y registro de commit | Paso apksigner aprobado; archivos publicados |
+| Firma APK y registro de commit | Nueva identidad estable y huella comprobada antes de publicar; archivos de origen y firma incluidos |
 | Sintaxis de la extensión JavaScript | Aprobada mediante Node en CI |
 | Validación del contrato | Cuatro métricas nuevas, unidades y registros inválidos |
 | Enrutamiento a tabla deportiva | Probado con base simulada |
@@ -122,8 +125,8 @@ Referencias de las herramientas:
 | Conservación clínica | Conteos existentes conservados durante los cambios; no se enviaron actualizaciones de analíticas o INR |
 | Copia privada | Copia de documentos creada y releída; incluye el registro deportivo |
 | Recuperación D1 | Disponibilidad de bookmark de Time Travel comprobada; no se ejecutó restauración sobre producción |
-| Navegador autenticado | Revisión visual final no completada por indisponibilidad de conexión |
-| Teléfono 0.4 | Pendiente |
+| Pantalla Cuerpo | La usuaria confirmó datos actualizados después del envío; no sustituye la revisión de todas las métricas ni la del nuevo APK |
+| Teléfono 0.5 | Pendiente |
 
 Una prueba de almacenamiento no demuestra por sí sola el recorrido completo Health Connect → móvil → API → D1 → pantalla.
 
@@ -135,12 +138,14 @@ Una prueba de almacenamiento no demuestra por sí sola el recorrido completo Hea
 - No ampliar el puente a otras fuentes sin revisar identidad, aislamiento y permisos.
 - Mantener HTTPS, validación, deduplicación y reintentos.
 - Comprobar la rotación de credenciales mostradas en capturas anteriores; no consta una rotación verificada en este cierre.
-- Firma debug: puede diferir de APK previos. No desinstalar a ciegas, porque se perderían configuración y cola locales.
+- APK anteriores: firmas debug efímeras y conflicto de actualización observado. No se dispone de la clave antigua.
+- Sync 2: firma estable obtenida mediante identidad OIDC de GitHub con restricciones de repositorio, propietario, rama, workflow, evento y vigencia. El material privado se conserva como secretos en un Worker dedicado, separado de los datos de salud; no se publica.
+- No desinstalar la aplicación anterior: instalar Sync 2 al lado, detener la tarea antigua e importar la configuración en la nueva.
 - Las copias locales Android están desactivadas.
 - No activar IA con información personal sin consentimiento específico.
 
 ## 9. Pendientes ordenados
-1. Instalar 0.4 en el teléfono e identificar cualquier incompatibilidad de firma antes de desinstalar.
+1. Detener la tarea diaria en la aplicación anterior e instalar Sync 2 (0.5) al lado. No requiere desinstalar ni borrar datos. Importar el archivo privado conservado.
 2. Conceder permisos nuevos y acceso en segundo plano cuando esté disponible.
 3. Diagnosticar fuentes por métrica: registrar DataOrigin, fecha y tipos realmente existentes.
 4. Sincronizar manualmente con la configuración privada vigente.
@@ -149,7 +154,7 @@ Una prueba de almacenamiento no demuestra por sí sola el recorrido completo Hea
 7. Comprobar al menos dos ejecuciones periódicas; WorkManager no garantiza una hora exacta.
 8. Para campos exclusivos de Zepp, conseguir una exportación legible o conservar entrada manual. No prometer API o exportación no verificadas.
 9. Revisar borrados y cambios anteriores a siete días: todavía no están reconciliados.
-10. Revisar firma estable para futuras actualizaciones y procedimiento privado de credenciales.
+10. Mantener la identidad estable de Sync 2 y revisar el procedimiento de recuperación privada y rotación de credenciales.
 11. Completar revisión visual y una prueba de restauración en un entorno aislado.
 12. Mantener cualquier función de IA pendiente del consentimiento específico.
 
@@ -176,7 +181,7 @@ mindmap
       Amazfit y Zepp
       Health Connect
       Origen por métrica
-    Android 0.4
+    Android 0.5
       Permisos opcionales
       Cola cifrada
       Progreso y reintentos
@@ -196,7 +201,7 @@ mindmap
       SQLite y D1 sintéticos
       Pasos y pulso reales
     Pendientes
-      Prueba física 0.4
+      Prueba física 0.5
       Nuevas métricas reales
       Dos ciclos periódicos
       Firma y seguridad
@@ -206,3 +211,11 @@ mindmap
 Continuar desde esta memoria y verificar únicamente lo que pudo cambiar. No reinstalar herramientas, no reiniciar el proyecto y no presentar fases preparadas como integración completa. Revisar el commit del APK y el estado real de la rama antes de escribir. Pedir archivos únicamente si no son accesibles. Informar lo realizado con evidencia y los bloqueos concretos.
 
 Esta memoria excluye credenciales, identificadores personales y valores médicos. El dashboard documental es una fotografía del estado del proyecto, no consulta la D1 clínica ni se actualiza solo.
+
+## 14. Cierre de la incidencia de instalación y lentitud
+- Conflicto de instalación observado al intentar sustituir el APK antiguo.
+- Se preparó Sync 2 como instalación independiente para conservar la aplicación anterior.
+- Firma estable en servidor de firma aislado; acceso OIDC de corta duración, sin claves privadas en GitHub ni en el APK.
+- La cola nueva omite únicamente registros idénticos con acuse previo y reenvía cambios. El primer envío de una instalación nueva sigue revisando siete días.
+- Auditoría de producción: sin claves duplicadas ni muestras iguales repetidas en los datos existentes al corte. No equivale a prometer deduplicación semántica universal.
+- La sincronización automática sigue pendiente de comprobar en el teléfono y observar en dos ejecuciones reales.

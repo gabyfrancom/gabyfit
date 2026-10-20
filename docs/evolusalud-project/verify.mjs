@@ -10,7 +10,7 @@ const memoryLine=scripts[0][1].split('\n').find(l=>l.startsWith('const memory=')
 assert.ok(memoryLine);
 assert.equal(JSON.parse(memoryLine.slice('const memory='.length,-1)),md);
 for(const id of ['overview','map','checks','next','memory'])assert.ok(html.includes('id="'+id+'"'));
-assert.ok(md.includes('42a02b541cadc1db8539aceb0643cfce7b348266'));
+assert.ok(md.includes('7b543c1023331518614351376c9fccd0f571a157'));
 assert.ok(md.includes('La integración completa aún no está cerrada'));
 assert.ok(!/cf_client_secret["']?\s*:\s*["'][^"']+/i.test(html));
 console.log('PASS: dashboard JS syntax, memory parity, five views and required continuity warnings.');
