@@ -1,25 +1,15 @@
-# GabyFit Sync · Fase 1
+# GabyFit Sync — staging 0.2
 
-Proyecto Android nativo Kotlin. Diagnóstico de orígenes de pasos y pulso desde Health Connect y programación de lectura diaria local. **No incluye una conexión directa a Zepp**, Supabase ni a las API de IA.
+Android SDK36, JDK17, Gradle8.11.1. Rama de desarrollo; no se fusiona ni se modifica producción.
 
-## Abrir
-1. Instala Android Studio actualizado, SDK 35 y JDK 17.
-2. Abre la carpeta `GabyFitSync` con **Open**. El proyecto se suministra sin binarios del Gradle wrapper; Android Studio debe tener Gradle configurado, o genera el wrapper usando una instalación local de Gradle (`gradle wrapper --gradle-version 8.11.1`).
-3. Sincroniza el proyecto con Gradle; ejecuta en un móvil físico Android con Health Connect.
-4. En Zepp sincroniza manualmente el reloj; revisa que Zepp escriba pasos/pulso en Health Connect.
-5. En la app: solicita permisos → diagnostica fuentes (7 días) → comprueba `dataOrigin.packageName`.
-6. Si existe el permiso de Health Connect para segundo plano, concédelo y activa el trabajo diario.
+Lee pasos, pulso, sesiones de sueño y entrenamientos durante siete días, con diagnóstico de DataOrigin por tipo. La sesión de sueño no equivale a minutos de sueño efectivo. No se presupone que Zepp sea una fuente compatible.
 
-## Resultado esperado
-Si no hay datos, la app informa `Sin registros`. Si existen, muestra nombres de paquetes por origen. No concluyas que una fuente es Zepp hasta comprobar su identidad en tu móvil.
+Instala el APK de GitHub Releases, sin caducidad automática de Actions. Comprueba SOURCE-COMMIT.txt, SHA256SUMS.txt y APK-SIGNATURE.txt. Es un APK debug: no habilitar datos personales hasta validar permisos y procedencia en el móvil. Las firmas debug pueden variar entre compilaciones; conserva las credenciales antes de cambiar de instalación.
 
-## Límites importantes
-- La prueba aún no persiste registros ni sube datos a Supabase.
-- WorkManager es aproximado, no garantiza ejecución a una hora exacta.
-- No fuerza a Zepp a sincronizar el reloj por Bluetooth.
-- Los pasos por origen pueden solaparse y no deben sumarse como total consolidado.
-- Es un proyecto fuente sin APK precompilado y no se ha podido compilar contra un SDK Android en este entorno.
-- La publicación en Google Play requiere completar las políticas y declaraciones de datos de salud.
+Importa el JSON privado de configuración desde el móvil. Nunca lo subas al repositorio ni lo compartas. Credenciales y cola cifradas mediante Android Keystore, backups Android desactivados, HTTPS y host de staging fijo, sin redirecciones. El secreto Access solo autoriza la ruta de ingesta, no el dashboard.
 
-## Próxima fase
-Persistencia local cifrada; control de sincronizaciones, lectura incremental, backend autenticado y sincronización con Supabase. Nunca colocar las claves API de OpenAI o Anthropic en la aplicación móvil.
+Pulsa solicitar permisos, Diagnosticar fuentes y Sincronizar ahora. Comprueba fuentes y horas en Health Connect y después en EvoluSalud staging. Solo programa la tarea diaria tras validar el envío manual; WorkManager depende de conectividad, batería y permiso de segundo plano. Existe botón para detenerla.
+
+Se conserva la cola hasta recibir acuse con sync_id y número de registros. Se reintenta en fallos de conexión, 408, 429 y 5xx; otros estados requieren corregir configuración. Las claves de datos impiden duplicados por fuente, registro y métrica. Se vuelven a leer siete días; no existe todavía reconciliación de borrados ni cambios anteriores a esa ventana.
+
+No se envían datos a IA. La prueba física y la validación visual autenticada del dashboard son obligatorias antes de considerar terminada la integración.

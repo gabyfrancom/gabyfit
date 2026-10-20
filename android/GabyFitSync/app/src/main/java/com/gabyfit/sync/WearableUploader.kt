@@ -68,6 +68,7 @@ class WearableUploader(context: Context) {
                             connection.requestMethod = "POST"
                             connection.connectTimeout = 20000; connection.readTimeout = 20000
                             connection.doOutput = true
+                            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) GabyFitSync/0.2")
                             connection.setRequestProperty("Content-Type", "application/json")
                             connection.setRequestProperty("Authorization", "Bearer $bearer")
                             connection.setRequestProperty("CF-Access-Client-Id", clientId)
