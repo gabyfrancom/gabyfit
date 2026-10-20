@@ -21,7 +21,12 @@ export async function verifyToken(token,fetcher=fetch){
  if(typeof token!=='string'||token.length>16000)throw Error('token');
  const parts=token.split('.');if(parts.length!==3)throw Error('token');
  const h=decode(parts[0]),claims=decode(parts[1]);
- if(h.alg!=='RS256'||typeof h.kid!=='string'||h.kid.length>200||h.crit||!allowedClaims(claims))throw Error('claims');
+ if(h.alg!=='RS256'||typeof h.kid!=='string'||h.kid.length>200||h.crit)throw Error('header');
+ if(!allowedClaims(claims)){
+ const expected={iss:ISSUER,aud:AUDIENCE,repository:REPO,repository_id:'1207292560',repository_owner_id:'109766180',ref:REF,sub:'repo:'+REPO+':ref:'+REF,workflow_ref:WORKFLOW,event_name:'push'};
+ const fields=Object.entries(expected).filter(([k,v])=>String(claims[k])!==v).map(([k])=>k);
+ throw Error('claims:'+ (fields.join(',')||'time_or_sha'));
+ }
  let keys;
  if(fetcher===fetch&&cache&&cache.until>Date.now())keys=cache.keys;
  else{const res=await fetcher(JWKS,{redirect:'error',signal:AbortSignal.timeout(8000)});if(!res.ok)throw Error('jwks');const text=await res.text();if(text.length>100000)throw Error('jwks');const j=JSON.parse(text);if(!Array.isArray(j.keys)||j.keys.length>32)throw Error('jwks');keys=j.keys;if(fetcher===fetch)cache={keys,until:Date.now()+300000};}
@@ -36,7 +41,7 @@ export default {async fetch(request,env){
  if(request.method!=='POST')return reject('method',405);
  const a=request.headers.get('authorization')||'';
  if(!a.startsWith('Bearer '))return reject('unauthorized',401);
- try{await verifyToken(a.slice(7));}catch{return reject('unauthorized',401);}
+ try{await verifyToken(a.slice(7));}catch(e){return reject('unauthorized:'+String(e.message).slice(0,100),401);}
  if(!env.SIGNING_P12||!env.SIGNING_PASSWORD)return reject('unavailable',503);
  return new Response(JSON.stringify({keystore_b64:env.SIGNING_P12,password:env.SIGNING_PASSWORD,key_alias:'gabyfit-v2',certificate_sha256:'bd73cb2df937dc23bc1cab74ef62ab940de13eeb2b5be9091d11a93743663855'}),{headers:HEADERS});
 }};
