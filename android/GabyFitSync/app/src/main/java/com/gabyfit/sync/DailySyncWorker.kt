@@ -36,7 +36,10 @@ class DailySyncWorker(context: Context, params: WorkerParameters): CoroutineWork
                 Result.failure()
             } else {
                 // Envío a staging, sin datos de salud en Logcat.
-                WearableUploader(applicationContext).upload()
+                val sent = WearableUploader(applicationContext).upload()
+                val secure = SecureSettings(applicationContext)
+                secure.save("last_daily_success_at", java.time.Instant.now().toString())
+                secure.save("last_daily_count", sent.toString())
                 Result.success()
             }
         }

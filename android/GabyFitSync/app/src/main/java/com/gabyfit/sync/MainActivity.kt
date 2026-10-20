@@ -48,7 +48,7 @@ class MainActivity: ComponentActivity() {
         fun button(label: String, action: () -> Unit) {
             root.addView(Button(this).apply { text = label; setOnClickListener { action() } })
         }
-        root.addView(TextView(this).apply { text = "GabyFit Sync · Staging"; textSize = 23f })
+        root.addView(TextView(this).apply { text = "GabyFit Sync 2 · 0.5"; textSize = 23f })
         button("1 · Solicitar permisos") {
             if (HealthConnectClient.getSdkStatus(this) != HealthConnectClient.SDK_AVAILABLE) {
                 status.text = "Health Connect no está disponible o requiere actualización"
@@ -143,12 +143,28 @@ class MainActivity: ComponentActivity() {
                         val sent = WearableUploader(this@MainActivity).upload { confirmed ->
                             status.text = "Registros confirmados: $confirmed. Continúa la sincronización…"
                         }
-                        status.text = "Registros enviados: $sent"
+                        secure.save("last_manual_success_at", java.time.Instant.now().toString())
+                        secure.save("last_manual_count", sent.toString())
+                        status.text = if (sent == 0) "Sin registros nuevos: los disponibles ya estaban confirmados." else "Registros confirmados: $sent"
                     }
                 } catch (e: Exception) { status.text = "No se completó el envío: ${e.localizedMessage}" }
                 finally { syncInProgress = false }
             }
         }
+        button("Ver estado de sincronización") {
+            lifecycleScope.launch {
+                val last = secure.get("last_daily_success_at") ?: "Todavía sin envío automático confirmado"
+                val count = secure.get("last_daily_count") ?: "—"
+                val work = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    androidx.work.WorkManager.getInstance(this@MainActivity).getWorkInfosForUniqueWork("gabyfit_daily_sync").get()
+                }
+                status.text = "Tarea diaria: " + (work.firstOrNull()?.state?.toString() ?: "No programada") +
+                    "\nÚltimo envío automático completado: " + last + "\nRegistros confirmados: " + count
+            }
+        }
+        root.addView(TextView(this).apply {
+            text = "Primera instalación de Sync 2: importa tu archivo privado. Conserva la aplicación anterior; detén su tarea diaria para evitar dos sincronizadores."
+        })
         button("Privacidad") { startActivity(Intent(this, PrivacyActivity::class.java)) }
         root.addView(status)
         setContentView(ScrollView(this).apply { addView(root) })
